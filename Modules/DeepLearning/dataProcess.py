@@ -26,12 +26,12 @@ def convert_age(age_str):
 
 
 def convert_gender(gender_str):
-    if gender_str is None:
-        return 0
-    elif gender_str == '男':
+    if gender_str == '男':
         return 1
     elif gender_str == '女':
         return 2
+    else:
+        return 0
 
 
 def convert_fans_cnt(fans_cnt_str):
@@ -55,12 +55,12 @@ def convert_coin_cnt(coin_cnt_str):
 
 
 def convert_post_type(post_type_str):
-    if post_type_str is None:
-        return 0
-    elif post_type_str == '常规视频':
+    if post_type_str == '常规视频':
         return 1
     elif post_type_str == '常规图文':
         return 2
+    else:
+        return 0
 
 
 def convert_duration_seconds(duration_str):
@@ -91,11 +91,6 @@ def data_process(path):
     data['post_type'] = data['post_type'].apply(convert_post_type)
     # 处理视频时长(数据缺失）
     # data['duration_seconds'] = data['duration_seconds'].apply(convert_duration_seconds)
-    # 选择特征和目标变量
-    features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-
-    X = data[features].values
-    y = data['interaction_cnt'].values
 
     return data
 
