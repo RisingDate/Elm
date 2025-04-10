@@ -2,7 +2,7 @@ import pandas as pd
 
 
 # 读取CSV到DataFrame
-data_A = pd.read_csv('../Dataset/A/train.txt', sep="\t")
+data_A = pd.read_csv('../../Dataset/A/train.txt', sep="\t")
 pd.set_option('display.max_columns', None)   # 显示所有列
 
 # 查看前5行
