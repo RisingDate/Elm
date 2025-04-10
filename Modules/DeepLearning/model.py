@@ -105,3 +105,11 @@ mse = mean_squared_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 print(f'Mean Squared Error: {mse}')
 print(f'R-squared: {r2}')
+
+
+
+# 保存整个模型
+torch.save(model, './models/model1.pth')
+# 加载整个模型
+loaded_model = torch.load('full_model.pth')
+loaded_model.eval()  # 设置为评估模式
