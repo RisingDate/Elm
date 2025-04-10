@@ -10,3 +10,8 @@ print(data_A.head(5))
 print(data_A.shape)
 # 访问某一列
 # print(data_A['column_name'])
+unique_age = data_A['age'].unique()
+print(unique_age)
+
+s = '999'
+print(int(s))
