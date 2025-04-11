@@ -1,4 +1,5 @@
 import numpy as np
+import time
 import torch
 import torch.optim as optim
 from sklearn.preprocessing import StandardScaler
@@ -18,13 +19,18 @@ if __name__ == '__main__':
     # 数据标准化
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
-    # 创建数据集和数据加载器
-    train_dataset = CustomDataset(x_train, y_train)
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
     # 初始化模型
     input_size = x_train.shape[1]
     model = SimpleNet(input_size)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cpu")
+
+    # 创建数据集和数据加载器
+    x_train = torch.tensor(x_train, dtype=torch.float32).to(device)
+    y_train = torch.tensor(y_train, dtype=torch.float32).to(device)
+    train_dataset = CustomDataset(x_train, y_train)
+    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 
     # 定义损失函数和优化器
     criterion = torch.nn.MSELoss()
@@ -32,11 +38,11 @@ if __name__ == '__main__':
 
     # 训练模型
     num_epochs = 50
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
     for epoch in range(num_epochs):
         model.train()
+        epoch_strat_time = time.time()
         running_loss = 0.0
         all_predictions = []
         all_labels = []
@@ -50,11 +56,12 @@ if __name__ == '__main__':
 
             running_loss += loss.item()
             # 收集预测结果和实际标签
-            all_predictions.extend(outputs.detach().cpu().numpy())
-            all_labels.extend(labels.detach().cpu().numpy())
+            all_predictions.append(outputs.detach())
+            all_labels.append(labels.detach())
 
+        epoch_end_time = time.time()
         # 计算评分
-        all_predictions = torch.tensor(all_predictions)
-        all_labels = torch.tensor(all_labels)
+        all_predictions = torch.cat(all_predictions, dim=0)
+        all_labels = torch.cat(all_labels, dim=0)
         score = torch.sum(torch.abs(all_predictions - all_labels)).item()
-        print(f'Epoch {epoch + 1}/{num_epochs}, Loss: {running_loss / len(train_loader)}, Score: {score}')
+        print(f'Epoch {epoch + 1}/{num_epochs}, Loss: {running_loss / len(train_loader)}, Score: {score}, Running Time: {epoch_end_time - epoch_strat_time}')

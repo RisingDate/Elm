@@ -1,5 +1,5 @@
 import pandas as pd
-
+import torch
 
 # 读取CSV到DataFrame
 data_A = pd.read_csv('../../Dataset/A/train.txt', sep="\t")
@@ -15,3 +15,4 @@ print(unique_age)
 
 s = '999'
 print(int(s))
+print(torch.cuda.is_available())
