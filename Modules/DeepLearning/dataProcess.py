@@ -3,7 +3,7 @@ import math
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
-
+from sklearn.preprocessing import StandardScaler
 
 class CustomDataset(Dataset):
     def __init__(self, X, y):
@@ -97,6 +97,10 @@ def data_process(path):
 
 if __name__ == '__main__':
     data = data_process('../../Dataset/A/train.txt')
+    features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt']
+    data = data[features]
     pd.set_option('display.max_columns', None)  # 显示所有列
-    print(data.head(5))
-    print(data.shape)
+    print(data.head(50))
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(data.values)
+    print(x_train[:50])
