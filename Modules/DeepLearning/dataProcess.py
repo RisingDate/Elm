@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
 
+
 class CustomDataset(Dataset):
     def __init__(self, X, y):
         self.X = torch.tensor(X, dtype=torch.float32)
