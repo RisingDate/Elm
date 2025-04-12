@@ -1,18 +1,18 @@
+import numpy as np
 import pandas as pd
 import torch
+from dataProcess import data_process
 
-# 读取CSV到DataFrame
-data_A = pd.read_csv('../../Dataset/A/train.txt', sep="\t")
-pd.set_option('display.max_columns', None)   # 显示所有列
 
-# 查看前5行
-print(data_A.head(5))
-print(data_A.shape)
-# 访问某一列
-# print(data_A['column_name'])
-unique_age = data_A['age'].unique()
-print(unique_age)
+data_path = '../../Dataset/A/A.txt'
+test_data = data_process(data_path)
+ids = test_data.iloc[:, 0].values
+arr_1d = np.ones(73160)
 
-s = '999'
-print(int(s))
-print(torch.cuda.is_available())
+combined = np.c_[ids, arr_1d]
+print(combined)
+
+# 转换为DataFrame并添加表头
+df = pd.DataFrame(combined, columns=["id", "interaction_cnt"])
+# 保存为txt文件（tab分隔）
+df.to_csv("./results/all1.txt", sep="\t", index=False, header=True)
