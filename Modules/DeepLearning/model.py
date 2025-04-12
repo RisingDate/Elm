@@ -31,43 +31,34 @@ class SimpleNet(nn.Module):
 class InteractionPredictor(nn.Module):
     def __init__(self, input_size):
         super(InteractionPredictor, self).__init__()
+        self.fc1 = nn.Linear(input_size, 256)
+        self.bn1 = nn.BatchNorm1d(256)
+        self.drop1 = nn.Dropout(0.4)
 
-        # 网络层设计
-        self.fc1 = nn.Linear(input_size, 128)  # 第一全连接层
-        self.bn1 = nn.BatchNorm1d(128)  # 批标准化
-        self.drop1 = nn.Dropout(0.3)  # Dropout层
+        self.fc2 = nn.Linear(256, 128)
+        self.bn2 = nn.BatchNorm1d(128)
+        self.drop2 = nn.Dropout(0.3)
 
-        self.fc2 = nn.Linear(128, 64)  # 第二全连接层
-        self.bn2 = nn.BatchNorm1d(64)
-        self.drop2 = nn.Dropout(0.2)
+        self.fc3 = nn.Linear(128, 64)
+        self.bn3 = nn.BatchNorm1d(64)
 
-        self.fc3 = nn.Linear(64, 32)  # 第三全连接层
-        self.bn3 = nn.BatchNorm1d(32)
+        self.output = nn.Linear(64, 1)
 
-        self.output = nn.Linear(32, 1)  # 输出层
-
-        # 初始化权重
         self._init_weights()
 
     def _init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
         x = F.relu(self.bn1(self.fc1(x)))
         x = self.drop1(x)
-
         x = F.relu(self.bn2(self.fc2(x)))
         x = self.drop2(x)
-
         x = F.relu(self.bn3(self.fc3(x)))
-
-        # 输出层不使用激活函数，因为这是回归问题
-        x = self.output(x)
-        return x
+        return self.output(x)
 
 # # 评估模型
 # model.eval()

@@ -13,10 +13,11 @@ if __name__ == '__main__':
     path = '../../Dataset/A/train.txt'
     train_data = data_process(path)
     # 选择特征和目标变量
-    # features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-    features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt']
+    features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
+    # features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt']
     x_train = train_data[features].values
     y_train = train_data['interaction_cnt'].values
+    y_train = np.log(y_train+1)
 
     # 数据标准化
     scaler = StandardScaler()
@@ -35,8 +36,8 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
     # 定义损失函数和优化器
-    criterion = nn.SmoothL1Loss()  # 替换为更鲁棒的损失函数
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+    criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
+    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
 
     # 训练模型
     num_epochs = 50
@@ -46,8 +47,7 @@ if __name__ == '__main__':
         model.train()
         epoch_strat_time = time.time()
         running_loss = 0.0
-        all_predictions = []
-        all_labels = []
+        score = 0.0
         for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
@@ -56,14 +56,20 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
 
+            # 转换回原始尺度并计算绝对值之差
+            original_labels = torch.exp(labels)  # y = exp(log(y))
+            original_outputs = torch.exp(outputs)  # pred = exp(log(pred))
+            abs_diff = torch.abs(original_labels - original_outputs)
+
+            score += abs_diff.sum().item()
             running_loss += loss.item()
-            # 收集预测结果和实际标签
-            all_predictions.append(outputs.detach())
-            all_labels.append(labels.detach())
 
         epoch_end_time = time.time()
         # 计算评分
-        all_predictions = torch.cat(all_predictions, dim=0)
-        all_labels = torch.cat(all_labels, dim=0)
-        score = torch.sum(torch.abs(all_predictions - all_labels)).item()
-        print(f'Epoch {epoch + 1}/{num_epochs}, Loss: {running_loss / len(train_loader)}, Score: {score}, Running Time: {epoch_end_time - epoch_strat_time}')
+        print(f'Epoch {epoch + 1}/{num_epochs}, '
+              f'Loss: {running_loss / len(train_loader)}, '
+              f'Score: {score}, '
+              f'Running Time: {epoch_end_time - epoch_strat_time}')
+
+    # 保存模型
+    torch.save(model, './models/model1.pth')
