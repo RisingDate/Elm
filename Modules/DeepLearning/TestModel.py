@@ -15,4 +15,4 @@ print(combined)
 # 转换为DataFrame并添加表头
 df = pd.DataFrame(combined, columns=["id", "interaction_cnt"])
 # 保存为txt文件（tab分隔）
-df.to_csv("./results/all1.txt", sep="\t", index=False, header=True)
+df.to_csv("./results/all0.txt", sep="\t", index=False, header=True)
