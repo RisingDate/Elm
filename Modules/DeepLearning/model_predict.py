@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     with torch.no_grad():
         log_predictions = model(x_test_tensor)
-        predictions = torch.exp(log_predictions) - 1
+        predictions = (torch.exp(log_predictions) - 1) / 4
 
     prediction_interaction_cnt = predictions.numpy().flatten()
 
@@ -36,4 +36,4 @@ if __name__ == '__main__':
     # 转换为DataFrame并添加表头
     df = pd.DataFrame(combined, columns=["id", "interaction_cnt"])
     # 保存为txt文件（tab分隔）
-    df.to_csv("./results/output-model1.txt", sep="\t", index=False, header=True)
+    df.to_csv("./results/output-model1-4.txt", sep="\t", index=False, header=True)
