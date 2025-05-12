@@ -35,8 +35,12 @@ def convert_gender(gender_str):
         return 0
 
 
-def convert_fans_cnt(fans_cnt_str):
-    fans_cnt_str = str(fans_cnt_str)
+def convert_fans_cnt(fans_cnt):
+    if fans_cnt == "" or isinstance(fans_cnt, float) and math.isnan(fans_cnt):
+        return 0
+    if type(fans_cnt) == str and fans_cnt == '小于100':
+        return 50
+    fans_cnt_str = str(fans_cnt)
     res = 0
     for s in fans_cnt_str:
         if '0' <= s <= '9':
@@ -79,6 +83,8 @@ def data_process(path):
     data['publish_time'] = pd.to_datetime(data['publish_time'], format='%Y%m%d')
     # 2. 做差
     data['statistical_duration'] = (data['update_time'] - data['publish_time']).dt.days + 1
+    # 3. 周几
+    data['publish_weekday'] = data['publish_time'].dt.weekday
 
     # 将性别处理为 0,1,2
     data['gender'] = data['gender'].apply(convert_gender)

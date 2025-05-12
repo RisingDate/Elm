@@ -13,8 +13,8 @@ if __name__ == '__main__':
     path = '../../Dataset/A/train.txt'
     train_data = data_process(path)
     # 选择特征和目标变量
-    features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-    # features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt']
+    # features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
+    features = ['fans_cnt', 'coin_cnt']
     x_train = train_data[features].values
     y_train = train_data['interaction_cnt'].values
     y_train = np.log(y_train+1)
@@ -72,4 +72,4 @@ if __name__ == '__main__':
               f'Running Time: {epoch_end_time - epoch_strat_time}')
 
     # 保存模型
-    torch.save(model, './models/model1.pth')
+    torch.save(model, './models/model-with-2-feature.pth')
