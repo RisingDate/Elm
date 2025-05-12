@@ -35,28 +35,41 @@ def convert_gender(gender_str):
         return 0
 
 
-def convert_fans_cnt(fans_cnt):
-    if fans_cnt == "" or isinstance(fans_cnt, float) and math.isnan(fans_cnt):
-        return 0
-    if type(fans_cnt) == str and fans_cnt == '小于100':
-        return 50
-    fans_cnt_str = str(fans_cnt)
-    res = 0
-    for s in fans_cnt_str:
-        if '0' <= s <= '9':
-            res = res * 10 + int(s)
-    return res
+def convert_fans_cnt(row):
+    x = row['fans_cnt']
+    coin_cnt = row['coin_cnt']
+    if x == "" or (isinstance(x, float) and math.isnan(x)):
+        if not math.isnan(coin_cnt):
+            print(coin_cnt)
+            return int(coin_cnt / 15)
+        else:
+            return 0
+    try:
+        x_num = float(x)          # 尝试转换为数值
+        return 999 if x_num >= 100 else x_num
+    except (ValueError, TypeError):
+        if x == "小于100":
+            return 50
+        else:
+            return x
 
 
-def convert_coin_cnt(coin_cnt_str):
-    if coin_cnt_str is None or (isinstance(coin_cnt_str, float) and math.isnan(coin_cnt_str)):
-        return 0
-    else:
-        res = 0
-        for s in coin_cnt_str:
-            if '0' <= s <= '9':
-                res = res * 10 + int(s)
-        return res
+def convert_coin_cnt(row):
+    x = row['coin_cnt']
+    fans_cnt = row['fans_cnt']
+    if x == "" or (isinstance(x, float) and math.isnan(x)):
+        if fans_cnt != "" and (isinstance(fans_cnt, float) and math.isnan(fans_cnt)) is False:
+            return fans_cnt * 15
+        else:
+            return 0
+    try:
+        x_num = float(x)          # 尝试转换为数值
+        return 999 if x_num >= 100 else x_num
+    except (ValueError, TypeError):
+        if x == "小于100":
+            return 50
+        else:
+            return x
 
 
 def convert_post_type(post_type_str):
@@ -91,9 +104,9 @@ def data_process(path):
     # 将年龄处理为 int
     data['age'] = data['age'].apply(convert_age)
     # 处理粉丝数量
-    data['fans_cnt'] = data['fans_cnt'].apply(convert_fans_cnt)
+    data['fans_cnt'] = data.apply(convert_fans_cnt, axis=1)
     # 处理硬币数
-    data['coin_cnt'] = data['coin_cnt'].apply(convert_coin_cnt)
+    data['coin_cnt'] =  data.apply(convert_coin_cnt, axis=1)
     # 处理主帖类型
     data['post_type'] = data['post_type'].apply(convert_post_type)
     # 处理视频时长(数据缺失）
