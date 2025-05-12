@@ -1,9 +1,6 @@
 import math
 
-import numpy as np
 import pandas as pd
-import torch
-from dataProcess import data_process
 
 
 def convert_fans_cnt(row):

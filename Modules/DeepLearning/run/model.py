@@ -60,6 +60,59 @@ class InteractionPredictor(nn.Module):
         x = F.relu(self.bn3(self.fc3(x)))
         return self.output(x)
 
+
+class DynamicBatchNorm(nn.BatchNorm1d):
+    def __init__(self, num_features):
+        super().__init__(num_features)
+        self.last_batch_size = None
+
+    def forward(self, x):
+        if self.training and (x.shape[0] != self.last_batch_size):
+            # 动态调整running stats
+            self.reset_running_stats()
+            self.last_batch_size = x.shape[0]
+        return super().forward(x)
+
+
+class EnhancedInteractionPredictor(nn.Module):
+    def __init__(self, input_size):
+        super().__init__()
+        self.input_proj = nn.Linear(input_size, 256)
+
+        self.block1 = nn.Sequential(
+            DynamicBatchNorm(256),
+            nn.GELU(),
+            nn.Dropout(0.4),
+            nn.Linear(256, 128)
+        )
+
+        self.block2 = nn.Sequential(
+            DynamicBatchNorm(128),
+            nn.GELU(),
+            nn.Dropout(0.3),
+            nn.Linear(128, 64)
+        )
+
+        self.output = nn.Sequential(
+            DynamicBatchNorm(64),
+            nn.Linear(64, 1),
+            nn.Softplus()
+        )
+
+        self._init_weights()
+
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.orthogonal_(m.weight)  # 更适合回归任务的初始化
+                nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        x = self.input_proj(x)
+        x = self.block1(x) + x[:, :128]  # 残差连接
+        x = self.block2(x) + x[:, :64]
+        return self.output(x)
+
 # # 评估模型
 # model.eval()
 # y_pred = []

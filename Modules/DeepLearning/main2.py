@@ -6,9 +6,8 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
-from model import InteractionPredictor
-from dataProcess import data_process, CustomDataset
-import time
+from Modules.DeepLearning.run.model import InteractionPredictor
+from Modules.DeepLearning.run.dataProcess import data_process
 
 
 def prepare_data(train_data):
