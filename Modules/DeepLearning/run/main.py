@@ -21,15 +21,16 @@ if __name__ == '__main__':
     train_data = data_process(path)
     # 选择特征和目标变量
     # features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-    features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-    x_train = train_data[features].values
+    features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                'video_cnt', 'post_type']  # 替换为实际的特征列名
+    x_train = train_data[features].valueskuisi
     y_train = train_data['interaction_cnt'].values
     y_train = np.log(y_train + 1)
 
     # 数据标准化
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
-    joblib.dump(scaler, '../models/scaler6.pkl')
+    joblib.dump(scaler, '../models/scaler7.pkl')
 
     # 初始化模型
     input_size = x_train.shape[1]
@@ -44,10 +45,10 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
     # 定义损失函数和优化器
-    # criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
-    # optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
-    criterion = LogCoshLoss()
-    optimizer = optim.NAdam(model.parameters(), lr=0.001)
+    criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
+    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+    # criterion = LogCoshLoss()
+    # optimizer = optim.NAdam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=1e-5)  # 学习率调度器
     # 训练模型
     num_epochs = 50
@@ -84,4 +85,4 @@ if __name__ == '__main__':
               f'Running Time: {epoch_end_time - epoch_strat_time}')
 
     # 保存模型
-    torch.save(model, '../models/model6.pth')
+    torch.save(model, '../models/model7.pth')
