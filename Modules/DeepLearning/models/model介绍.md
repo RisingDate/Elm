@@ -141,6 +141,28 @@
 
 
 
+## model 8
+
+**优化器：**criterion = nn.HuberLoss()
+
+**损失函数：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+**特征列：**
+
+```
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+            'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+            'avg_fans_per_video']
+```
+
+**损失函数值：**
+
+**得分：**
+
+**对应输出文件：**
+
+**提交得分：**
+
 ## model-with-2-feature
 
 **优化器：**optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)

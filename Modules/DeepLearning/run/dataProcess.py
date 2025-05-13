@@ -1,12 +1,12 @@
 import os
-os.chdir(os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+# os.chdir(os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 import math
 
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
-from ..embeddingText import process_text_features
+# from ..embeddingText import process_text_features
 
 
 class CustomDataset(Dataset):
@@ -184,9 +184,9 @@ def data_process(path, is_train=True):
     data['post_type'] = data.apply(convert_post_type, axis=1)
     # 文本特征处理
     text_columns = [col for col in ['title', 'content', 'cover_ocr_content', 'video_content'] if col in data.columns]
-    if text_columns:
-        text_features_df, text_feature_names = process_text_features(data, text_columns=text_columns)
-        data = pd.concat([data.reset_index(drop=True), text_features_df.reset_index(drop=True)], axis=1)
+    # if text_columns:
+    #     text_features_df, text_feature_names = process_text_features(data, text_columns=text_columns)
+    #     data = pd.concat([data.reset_index(drop=True), text_features_df.reset_index(drop=True)], axis=1)
 
     # 交叉特征
     data['authority_popularity'] = data['coin_cnt'] / (data['fans_cnt'] + 1)

@@ -22,8 +22,9 @@ if __name__ == '__main__':
     # 选择特征和目标变量
     # features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
-                'video_cnt', 'post_type']  # 替换为实际的特征列名
-    x_train = train_data[features].valueskuisi
+                'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+                'avg_fans_per_video']  # 替换为实际的特征列名
+    x_train = train_data[features].values
     y_train = train_data['interaction_cnt'].values
     y_train = np.log(y_train + 1)
 
@@ -85,4 +86,4 @@ if __name__ == '__main__':
               f'Running Time: {epoch_end_time - epoch_strat_time}')
 
     # 保存模型
-    torch.save(model, '../models/model7.pth')
+    torch.save(model, '../models/model8.pth')

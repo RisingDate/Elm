@@ -17,6 +17,7 @@ if __name__ == '__main__':
     model.eval()
 
     test_data = data_process(data_path, is_train=False)
+    print('Length of test_data', len(test_data))
     # features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
     # features = ['fans_cnt', 'coin_cnt']  # 替换为实际的特征列名
