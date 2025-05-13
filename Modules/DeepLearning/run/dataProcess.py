@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
-from embeddingText import process_text_features
+from ..embeddingText import process_text_features
 
 
 class CustomDataset(Dataset):
@@ -82,7 +82,7 @@ def convert_video_cnt(x):
 
 def convert_post_type(row):
     # 常规视频1, 常规图文2， 广告视频3， 广告图文4， 其他5
-    post_type_str = row['post_type_str']
+    post_type_str = row['post_type']
     # 判断为 nan
     if post_type_str is None or post_type_str == "" or pd.isna(post_type_str):
         if 'video_content' in row and pd.notna(row['video_content']) and str(row['video_content']).strip():
@@ -110,8 +110,12 @@ def convert_post_type(row):
         return 1
     elif post_type_str == '常规图文':
         return 2
+    elif post_type_str == '广告视频':
+        return 3
+    elif post_type_str == '广告图文':
+        return 4
     else:
-        return 0
+        return 5
 
 
 city_first_tier = ['北京', '上海', '广州', '深圳']
@@ -183,6 +187,14 @@ def data_process(path, is_train=True):
     if text_columns:
         text_features_df, text_feature_names = process_text_features(data, text_columns=text_columns)
         data = pd.concat([data.reset_index(drop=True), text_features_df.reset_index(drop=True)], axis=1)
+
+    # 交叉特征
+    data['authority_popularity'] = data['coin_cnt'] / (data['fans_cnt'] + 1)
+    data['fans_video_ratio'] = data['fans_cnt'] / (data['video_cnt'] + 1)
+    # 作品均获硬币数
+    data['avg_coin_per_video'] = data['coin_cnt'] / (data['video_cnt'] + 1)
+    # 作品均获粉丝数
+    data['avg_fans_per_video'] = data['fans_cnt'] / (data['video_cnt'] + 1)
     return data
 
 

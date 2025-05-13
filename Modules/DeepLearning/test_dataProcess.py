@@ -7,6 +7,7 @@ import seaborn as sns
 
 matplotlib.use('TkAgg')
 
+
 def convert_fans_cnt(row):
     x = row['fans_cnt']
     coin_cnt = row['coin_cnt']
@@ -17,7 +18,7 @@ def convert_fans_cnt(row):
         else:
             return 0
     try:
-        x_num = float(x)          # 尝试转换为数值
+        x_num = float(x)  # 尝试转换为数值
         return 999 if x_num >= 100 else x_num
     except (ValueError, TypeError):
         if x == "小于100":
@@ -35,7 +36,7 @@ def convert_coin_cnt(row):
         else:
             return 0
     try:
-        x_num = float(x)          # 尝试转换为数值
+        x_num = float(x)  # 尝试转换为数值
         return 999 if x_num >= 100 else x_num
     except (ValueError, TypeError):
         if x == "小于100":
@@ -67,6 +68,44 @@ def convert_age(age_str):
     elif '-' in age_str:
         start, end = map(int, age_str.replace('岁', '').split('-'))
         return (start + end) // 2
+
+
+def convert_post_type(row):
+    # 常规视频1, 常规图文2， 广告视频3， 广告图文4， 其他5
+    post_type_str = row['post_type']
+    # 判断为 nan
+    if post_type_str is None or post_type_str == "" or pd.isna(post_type_str):
+        if 'video_content' in row and pd.notna(row['video_content']) and str(row['video_content']).strip():
+            if '广告' in str(row.get('title', '')) + str(row.get('content', '')):
+                return 3
+            else:
+                return 1
+        else:
+            title = str(row.get('title', ''))
+            content = str(row.get('content', ''))
+            text = title + content
+            if '广告' in text:
+                if '视频' in text:
+                    return 3
+                else:
+                    return 4
+            else:
+                if '视频' in text:
+                    return 1
+                elif '图文' in text or '图片' in text:
+                    return 2
+                else:
+                    return 5
+    if post_type_str == '常规视频':
+        return 1
+    elif post_type_str == '常规图文':
+        return 2
+    elif post_type_str == '广告视频':
+        return 3
+    elif post_type_str == '广告图文':
+        return 4
+    else:
+        return 5
 
 
 city_first_tier = ['北京', '上海', '广州', '深圳']
@@ -123,6 +162,9 @@ print('unique_gender', unique_gender)
 
 unique_city = data['city'].apply(convert_city).unique()
 print('unique_city', unique_city)
+
+unique_post_type = data.apply(convert_post_type, axis=1).unique()
+print('post_type', unique_post_type)
 # pd.DataFrame(unique_city, columns=['city']).to_csv('../../Dataset/B/test/unique_city.csv', index=False)
 
 # citys = data['city'].apply(convert_city)
@@ -130,4 +172,3 @@ print('unique_city', unique_city)
 #     'city': citys,
 #     'interaction_cnt': data['interaction_cnt']
 # }).to_csv('../../Dataset/B/test/city_and_interaction.csv', index=False)
-
