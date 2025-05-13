@@ -3,13 +3,14 @@ import pandas as pd
 import torch
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
+import joblib
 
 from dataProcess import data_process, CustomDataset
 
 
 if __name__ == '__main__':
-    data_path = '../../../Dataset/B/B.txt'
-    model_path = '../models/model6.pth'
+    data_path = '../../../Dataset/A/train_data.txt'
+    model_path = '../models/model1-new.pth'
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = torch.load(model_path, map_location=device, weights_only=False)
@@ -17,27 +18,27 @@ if __name__ == '__main__':
 
     test_data = data_process(data_path)
     # features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-    features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
+    features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
     # features = ['fans_cnt', 'coin_cnt']  # 替换为实际的特征列名
-    x_test = test_data[features]
+    x_test = test_data[features].values
+    y_test = test_data['interaction_cnt'].values
 
-    scaler = StandardScaler()
-    x_test_scaled = scaler.fit_transform(x_test.values)
+    # scaler = StandardScaler()
+    scaler = joblib.load('../models/scaler1-new.pkl')
+    x_test_scaled = scaler.transform(x_test)
     x_test_tensor = torch.tensor(x_test_scaled, dtype=torch.float32).to(device)
 
     with torch.no_grad():
         log_predictions = model(x_test_tensor)
-        predictions = (torch.exp(log_predictions) - 1) / 4
+        predictions = torch.exp(log_predictions) - 1
         predictions = predictions.floor().int()
 
     prediction_interaction_cnt = predictions.numpy().flatten()
+    print(f'len of y_test: {len(y_test)}')
+    print(f'len of prediction_interaction_cnt: {len(prediction_interaction_cnt)}')
 
-    ids = test_data.iloc[:, 0].values
-    combined = np.c_[ids, prediction_interaction_cnt]
-    print(combined)
-
-    # 转换为DataFrame并添加表头
-    df = pd.DataFrame(combined, columns=["id", "interaction_cnt"])
-    # 保存为txt文件（tab分隔）
-    df.to_csv("../results/B/output-250512-6.txt", sep='\t', index=False, header=True)
-    df.to_csv("../results/B/output-250512-6.csv", index=False, header=True)
+    absolute_errors = np.abs(y_test - prediction_interaction_cnt)
+    print(f'len of absolute_errors: {len(absolute_errors)}')
+    absolute_errors_sum = np.sum(absolute_errors)
+    score = absolute_errors_sum / len(absolute_errors)
+    print(f'score: {score}')
