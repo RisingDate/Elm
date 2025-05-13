@@ -48,8 +48,7 @@ def convert_fans_cnt(row):
         else:
             return 0
     try:
-        x_num = float(x)          # 尝试转换为数值
-        return 999 if x_num >= 100 else x_num
+        return float(x)
     except (ValueError, TypeError):
         if x == "小于100":
             return 50
@@ -66,8 +65,7 @@ def convert_coin_cnt(row):
         else:
             return 0
     try:
-        x_num = float(x)          # 尝试转换为数值
-        return 999 if x_num >= 100 else x_num
+        return float(x)          # 尝试转换为数值
     except (ValueError, TypeError):
         if x == "小于100":
             return 50
@@ -91,8 +89,14 @@ def convert_duration_seconds(duration_str):
         return int(duration_str)
 
 
-def data_process(path):
+def data_process(path, is_train=True):
     data = pd.read_csv(path, sep="\t")
+    # 训练集去除数据中的极端点 -> 从train中剔除interaction_cnt 99.8%分位数以上的数据
+    if is_train:
+        quantile_998 = data['interaction_cnt'].quantile(0.998)
+        print(f'quantile_998: {quantile_998}')
+        data = data[data['interaction_cnt'] <= quantile_998]
+
     # 将 素材发布时间 与 素材互动量更新时间 做差 得到 统计时长
     # 1. 将这两列转为timestamp格式
     data['update_time'] = pd.to_datetime(data['update_time'], format='%Y%m%d')
@@ -100,7 +104,7 @@ def data_process(path):
     # 2. 做差
     data['statistical_duration'] = (data['update_time'] - data['publish_time']).dt.days + 1
     # 3. 周几
-    data['publish_weekday'] = data['publish_time'].dt.weekday
+    data['publish_weekday'] = data['publish_time'].dt.weekday >= 5
 
     # 将性别处理为 0,1,2
     data['gender'] = data['gender'].apply(convert_gender)
@@ -109,7 +113,7 @@ def data_process(path):
     # 处理粉丝数量
     data['fans_cnt'] = data.apply(convert_fans_cnt, axis=1)
     # 处理硬币数
-    data['coin_cnt'] =  data.apply(convert_coin_cnt, axis=1)
+    data['coin_cnt'] = data.apply(convert_coin_cnt, axis=1)
     # 处理主帖类型
     data['post_type'] = data['post_type'].apply(convert_post_type)
     # 文本特征处理
@@ -121,7 +125,7 @@ def data_process(path):
 
 
 if __name__ == '__main__':
-    data = data_process('Dataset/A/train.txt')
+    data = data_process('../../../Dataset/A/train.txt')
     features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt']
     data = data[features]
     pd.set_option('display.max_columns', None)  # 显示所有列

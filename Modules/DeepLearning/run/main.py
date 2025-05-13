@@ -5,29 +5,37 @@ import torch.optim as optim
 import torch.nn as nn
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
+import joblib
 
 from dataProcess import data_process, CustomDataset
-from model import SimpleNet, InteractionPredictor
+from model import SimpleNet, InteractionPredictor, EnhancedInteractionPredictor
+
+
+class LogCoshLoss(nn.Module):
+    def forward(self, y_pred, y_true):
+        return torch.mean(torch.log(torch.cosh(y_pred - y_true)))
+
 
 if __name__ == '__main__':
-    path = '../../Dataset/A/train.txt'
+    path = '../../../Dataset/A/train_data.txt'
     train_data = data_process(path)
     # 选择特征和目标变量
-    # features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-    features = ['fans_cnt', 'coin_cnt']
+    # features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
+    features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
     x_train = train_data[features].values
     y_train = train_data['interaction_cnt'].values
-    y_train = np.log(y_train+1)
+    y_train = np.log(y_train + 1)
 
     # 数据标准化
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
+    joblib.dump(scaler, '../models/scaler6.pkl')
 
     # 初始化模型
     input_size = x_train.shape[1]
     model = InteractionPredictor(input_size)
+    # model = EnhancedInteractionPredictor(input_size)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # device = torch.device("cpu")
 
     # 创建数据集和数据加载器
     x_train = torch.tensor(x_train, dtype=torch.float32).to(device)
@@ -36,9 +44,11 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
     # 定义损失函数和优化器
-    criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
-    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
-
+    # criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
+    # optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+    criterion = LogCoshLoss()
+    optimizer = optim.NAdam(model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=1e-5)  # 学习率调度器
     # 训练模型
     num_epochs = 50
     model.to(device)
@@ -55,6 +65,7 @@ if __name__ == '__main__':
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
+            scheduler.step()
 
             # 转换回原始尺度并计算绝对值之差
             original_labels = torch.exp(labels)  # y = exp(log(y))
@@ -67,9 +78,10 @@ if __name__ == '__main__':
         epoch_end_time = time.time()
         # 计算评分
         print(f'Epoch {epoch + 1}/{num_epochs}, '
+              f'xTrain Len {len(x_train)}, '
               f'Loss: {running_loss / len(train_loader)}, '
-              f'Score: {score}, '
+              f'Score: {score / len(x_train)}, '
               f'Running Time: {epoch_end_time - epoch_strat_time}')
 
     # 保存模型
-    torch.save(model, './models/model-with-2-feature.pth')
+    torch.save(model, '../models/model6.pth')
