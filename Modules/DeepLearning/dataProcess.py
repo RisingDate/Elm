@@ -1,9 +1,12 @@
+import os
+os.chdir(os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 import math
 
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
+from embeddingText import process_text_features
 
 
 class CustomDataset(Dataset):
@@ -109,14 +112,16 @@ def data_process(path):
     data['coin_cnt'] =  data.apply(convert_coin_cnt, axis=1)
     # 处理主帖类型
     data['post_type'] = data['post_type'].apply(convert_post_type)
-    # 处理视频时长(数据缺失）
-    # data['duration_seconds'] = data['duration_seconds'].apply(convert_duration_seconds)
-
+    # 文本特征处理
+    text_columns = [col for col in ['title', 'content', 'cover_ocr_content', 'video_content'] if col in data.columns]
+    if text_columns:
+        text_features_df, text_feature_names = process_text_features(data, text_columns=text_columns)
+        data = pd.concat([data.reset_index(drop=True), text_features_df.reset_index(drop=True)], axis=1)
     return data
 
 
 if __name__ == '__main__':
-    data = data_process('../../Dataset/A/train.txt')
+    data = data_process('Dataset/A/train.txt')
     features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt']
     data = data[features]
     pd.set_option('display.max_columns', None)  # 显示所有列
