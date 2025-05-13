@@ -143,9 +143,9 @@
 
 ## model 8
 
-**优化器：**criterion = nn.HuberLoss()
+**优化器：**criterion = LogCoshLoss()
 
-**损失函数：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+**损失函数：**optim.NAdam(model.parameters(), lr=0.001)
 
 **特征列：**
 
@@ -155,11 +155,11 @@ features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age
             'avg_fans_per_video']
 ```
 
-**损失函数值：**
+**损失函数值：**Loss: 0.32943986714679124
 
-**得分：**
+**得分：**Score: 33.19924349409636
 
-**对应输出文件：**
+**对应输出文件：**output-250513-2.txt
 
 **提交得分：**
 

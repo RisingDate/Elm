@@ -22,6 +22,8 @@ class CustomDataset(Dataset):
 
 
 def convert_age(age_str):
+    if pd.isna(age_str):
+        return 70
     if '以上' in age_str:
         return 70
     elif '-' in age_str:

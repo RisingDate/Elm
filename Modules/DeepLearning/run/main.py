@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # 数据标准化
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
-    joblib.dump(scaler, '../models/scaler7.pkl')
+    joblib.dump(scaler, '../models/scaler8.pkl')
 
     # 初始化模型
     input_size = x_train.shape[1]
@@ -46,10 +46,10 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
     # 定义损失函数和优化器
-    criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
-    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
-    # criterion = LogCoshLoss()
-    # optimizer = optim.NAdam(model.parameters(), lr=0.001)
+    # criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
+    # optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+    criterion = LogCoshLoss()
+    optimizer = optim.NAdam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=1e-5)  # 学习率调度器
     # 训练模型
     num_epochs = 50
