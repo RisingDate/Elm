@@ -1,7 +1,11 @@
 import math
 
 import pandas as pd
+import matplotlib
+from matplotlib import pyplot as plt
+import seaborn as sns
 
+matplotlib.use('TkAgg')
 
 def convert_fans_cnt(row):
     x = row['fans_cnt']
@@ -40,6 +44,14 @@ def convert_coin_cnt(row):
             return x
 
 
+def convert_video_cnt(x):
+    if x == "" or (isinstance(x, float) and math.isnan(x)):
+        return 0
+    else:
+        x_num = float(x)
+        return 999 if x_num >= 100 else x_num
+
+
 def convert_gender(gender_str):
     if gender_str == '男':
         return 1
@@ -57,14 +69,33 @@ def convert_age(age_str):
         return (start + end) // 2
 
 
+city_first_tier = ['北京', '上海', '广州', '深圳']
+city_new_first_tier = ['成都', '重庆', '杭州', '武汉', '苏州',
+                       '西安', '南京', '长沙', '天津', '郑州',
+                       '东莞', '青岛', '沈阳', '宁波', '昆明']
+city_second_tier = ['厦门', '福州', '济南', '合肥', '无锡',
+                    '常州', '温州', '绍兴', '泉州', '嘉兴',
+                    '金华', '烟台', '珠海', '中山', '惠州',
+                    '海口', '南昌', '太原', '洛阳', '南宁',
+                    '贵阳', '遵义', '兰州', '乌鲁木齐',
+                    '银川', '大连', '哈尔滨', '长春']
+
+
 def convert_city(city_str):
     if city_str is None or city_str == "" or pd.isna(city_str):
-        return '未知'
+        return 3
     else:
-        return city_str
+        if any(keyword in city_str for keyword in city_first_tier):
+            return 0
+        elif any(keyword in city_str for keyword in city_new_first_tier):
+            return 1
+        elif any(keyword in city_str for keyword in city_second_tier):
+            return 2
+        else:
+            return 3
 
 
-data_path = '../../Dataset/B/B.txt'
+data_path = '../../Dataset/A/train_data.txt'
 data = pd.read_csv(data_path, sep="\t")
 
 data['fans_cnt'] = data.apply(convert_fans_cnt, axis=1)
@@ -84,15 +115,19 @@ unique_age = data['age'].apply(convert_age).unique()
 print('unique_age', unique_age)
 # pd.DataFrame(unique_age, columns=['age']).to_csv('../../Dataset/A/test/unique_age.csv', index=False)
 
+unique_video_cnt = data['video_cnt'].apply(convert_video_cnt).unique()
+print('unique_video_cnt', unique_video_cnt)
+
 unique_gender = data['gender'].apply(convert_gender).unique()
 print('unique_gender', unique_gender)
 
 unique_city = data['city'].apply(convert_city).unique()
 print('unique_city', unique_city)
-pd.DataFrame(unique_city, columns=['city']).to_csv('../../Dataset/B/test/unique_city.csv', index=False)
+# pd.DataFrame(unique_city, columns=['city']).to_csv('../../Dataset/B/test/unique_city.csv', index=False)
 
-citys = data['city'].apply(convert_city)
-pd.DataFrame({
-    'city': citys,
-    'interaction_cnt': data['interaction_cnt']
-}).to_csv('../../Dataset/B/test/city_and_interaction.csv', index=False)
+# citys = data['city'].apply(convert_city)
+# pd.DataFrame({
+#     'city': citys,
+#     'interaction_cnt': data['interaction_cnt']
+# }).to_csv('../../Dataset/B/test/city_and_interaction.csv', index=False)
+

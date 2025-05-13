@@ -18,8 +18,8 @@ if __name__ == '__main__':
 
     test_data = data_process(data_path, False)
     # features = ['site_id', 'statistical_duration', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-    features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'post_type']  # 替换为实际的特征列名
-    # features = ['fans_cnt', 'coin_cnt']  # 替换为实际的特征列名
+    features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                'video_cnt', 'post_type']  # 替换为实际的特征列名
     x_test = test_data[features].values
     y_test = test_data['interaction_cnt'].values
 

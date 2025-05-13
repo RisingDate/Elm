@@ -123,6 +123,24 @@
 
 
 
+## model 7
+
+**优化器：**optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+**损失函数：**criterion = nn.HuberLoss()
+
+**特征列：**features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'video_cnt', 'post_type']
+
+**损失函数值：**
+
+**得分：**
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
 ## model-with-2-feature
 
 **优化器：**optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)

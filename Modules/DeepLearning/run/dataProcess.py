@@ -73,13 +73,71 @@ def convert_coin_cnt(row):
             return x
 
 
-def convert_post_type(post_type_str):
+def convert_video_cnt(x):
+    if x == "" or (isinstance(x, float) and math.isnan(x)):
+        return 0
+    else:
+        return float(x)
+
+
+def convert_post_type(row):
+    # 常规视频1, 常规图文2， 广告视频3， 广告图文4， 其他5
+    post_type_str = row['post_type_str']
+    # 判断为 nan
+    if post_type_str is None or post_type_str == "" or pd.isna(post_type_str):
+        if 'video_content' in row and pd.notna(row['video_content']) and str(row['video_content']).strip():
+            if '广告' in str(row.get('title', '')) + str(row.get('content', '')):
+                return 3
+            else:
+                return 1
+        else:
+            title = str(row.get('title', ''))
+            content = str(row.get('content', ''))
+            text = title + content
+            if '广告' in text:
+                if '视频' in text:
+                    return 3
+                else:
+                    return 4
+            else:
+                if '视频' in text:
+                    return 1
+                elif '图文' in text or '图片' in text:
+                    return 2
+                else:
+                    return 5
     if post_type_str == '常规视频':
         return 1
     elif post_type_str == '常规图文':
         return 2
     else:
         return 0
+
+
+city_first_tier = ['北京', '上海', '广州', '深圳']
+city_new_first_tier = ['成都', '重庆', '杭州', '武汉', '苏州',
+                       '西安', '南京', '长沙', '天津', '郑州',
+                       '东莞', '青岛', '沈阳', '宁波', '昆明']
+city_second_tier = ['厦门', '福州', '济南', '合肥', '无锡',
+                    '常州', '温州', '绍兴', '泉州', '嘉兴',
+                    '金华', '烟台', '珠海', '中山', '惠州',
+                    '海口', '南昌', '太原', '洛阳', '南宁',
+                    '贵阳', '遵义', '兰州', '乌鲁木齐',
+                    '银川', '大连', '哈尔滨', '长春']
+
+
+def convert_city(city_str):
+    if city_str is None or city_str == "" or pd.isna(city_str):
+        return 3
+    else:
+        if any(keyword in city_str for keyword in city_first_tier):
+            return 0
+        elif any(keyword in city_str for keyword in city_new_first_tier):
+            return 1
+        elif any(keyword in city_str for keyword in city_second_tier):
+            return 2
+        else:
+            return 3
 
 
 def convert_duration_seconds(duration_str):
@@ -114,8 +172,12 @@ def data_process(path, is_train=True):
     data['fans_cnt'] = data.apply(convert_fans_cnt, axis=1)
     # 处理硬币数
     data['coin_cnt'] = data.apply(convert_coin_cnt, axis=1)
+    # 处理视频数量
+    data['video_cnt'] = data['video_cnt'].apply(convert_video_cnt)
+    # 处理城市等级（一线，新一线，二线，其他）
+    data['city_level'] = data['city'].apply(convert_city)
     # 处理主帖类型
-    data['post_type'] = data['post_type'].apply(convert_post_type)
+    data['post_type'] = data.apply(convert_post_type, axis=1)
     # 文本特征处理
     text_columns = [col for col in ['title', 'content', 'cover_ocr_content', 'video_content'] if col in data.columns]
     if text_columns:
