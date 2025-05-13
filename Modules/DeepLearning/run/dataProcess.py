@@ -88,6 +88,11 @@ def convert_duration_seconds(duration_str):
 
 def data_process(path):
     data = pd.read_csv(path, sep="\t")
+    # 去除数据中的极端点 -> 从train中剔除interaction_cnt 99.8%分位数以上的数据
+    quantile_998 = data['interaction_cnt'].quantile(0.998)
+    print(f'quantile_998: {quantile_998}')
+    data = data[data['interaction_cnt'] <= quantile_998]
+
     # 将 素材发布时间 与 素材互动量更新时间 做差 得到 统计时长
     # 1. 将这两列转为timestamp格式
     data['update_time'] = pd.to_datetime(data['update_time'], format='%Y%m%d')
