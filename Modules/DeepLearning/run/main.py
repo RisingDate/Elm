@@ -44,10 +44,10 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
     # 定义损失函数和优化器
-    criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
-    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
-    # criterion = LogCoshLoss()
-    # optimizer = optim.NAdam(model.parameters(), lr=0.001)
+    # criterion = nn.HuberLoss()  # 替换为更鲁棒的损失函数
+    # optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+    criterion = LogCoshLoss()
+    optimizer = optim.NAdam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=1e-5)  # 学习率调度器
     # 训练模型
     num_epochs = 50
