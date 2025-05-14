@@ -1,111 +1,87 @@
-import pandas as pd
 import numpy as np
+import time
 import torch
 import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
-from sklearn.preprocessing import LabelEncoder, KBinsDiscretizer
-from x_transformers import ContinuousTransformerWrapper, ContinuousAutoregressiveWrapper, Decoder
-from tqdm import tqdm
-from dataProcess import data_process
-from torch.nn import MSELoss
+import torch.nn as nn
+from sklearn.preprocessing import StandardScaler
+from torch.utils.data import DataLoader
+import joblib
 
-# ========== 数据读取与预处理 ==========
-
-# 特征字段
-features = [
-    'site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age',
-    'fans_cnt', 'coin_cnt', 'video_cnt', 'post_type', 'city_level',
-    'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video', 'avg_fans_per_video'
-]
-target = 'interaction_cnt'
-
-file_path = '../../../Dataset/A/train_data.txt'
-# 加载数据
-df = data_process(file_path)
-# df = pd.read_csv("your_data.csv")  # << 替换为你的数据路径
-
-# 整体特征值 -> int token
-X = df[features].values.astype(int)
-y = df[target].values
-y = np.round(y).astype(int)  # 如果是回归，可以进一步 bin 成分类 token
-
-# 转 Tensor
-X_tensor = torch.tensor(X, dtype=torch.long)
-y_tensor = torch.tensor(y, dtype=torch.long).unsqueeze(1)  # 作为序列目标
+from dataProcess import data_process, CustomDataset
+from model import XTransformer
 
 
-# 超参数
-DIM = 512  # 模型维度
-ENC_SEQ_LEN = 100  # 编码器输入序列长度（连续特征序列）
-DEC_SEQ_LEN = 100  # 解码器输出序列长度（连续特征序列）
-DIM_IN = 14  # 输入特征维度（如时间序列的特征数）
-DIM_OUT = 14  # 输出特征维度（如预测的连续值维度）
-NUM_BATCHES = 1000
-LEARNING_RATE = 1e-4
-GENERATE_EVERY = 100
-
-# 实例化模型（连续特征编码器-解码器）
-model = ContinuousTransformerWrapper(
-    dim_in = DIM_IN,               # 输入特征维度
-    dim_out = DIM_OUT,             # 输出特征维度
-    max_seq_len = ENC_SEQ_LEN,        # 最大序列长度
-    attn_layers = Decoder(            # 使用解码器架构（自回归生成）
-        dim = DIM,
-        depth = 3,
-        heads = 8,
-        rotary_pos_emb = True,        # 使用旋转位置编码
-    )
-).cuda()
-
-# 包装为自回归模式（如需生成连续序列）
-model = ContinuousAutoregressiveWrapper(model)
-
-# 优化器和损失函数
-optim = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-loss_fn = MSELoss()  # 连续值回归损失（均方误差）
+class LogCoshLoss(nn.Module):
+    def forward(self, y_pred, y_true):
+        return torch.mean(torch.log(torch.cosh(y_pred - y_true)))
 
 
-# 模拟数据生成器（返回连续特征张量）
-def data_generator():
-    while True:
-        # 输入：(batch_size, seq_len, dim_in) 连续特征
-        src = torch.randn(2, ENC_SEQ_LEN, DIM_IN).cuda()
-        # 目标：(batch_size, seq_len, dim_out) 连续值（如未来序列）
-        tgt = torch.randn(2, DEC_SEQ_LEN, DIM_OUT).cuda()
-        # 掩码（可选，忽略填充位置）
-        src_mask = torch.ones(2, ENC_SEQ_LEN).bool().cuda()
-        yield src, tgt, src_mask
+if __name__ == '__main__':
+    path = '../../../Dataset/A/train_data.txt'
+    train_data = data_process(path)
+    features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+                'avg_fans_per_video']  # 替换为实际的特征列名
+    x_train = train_data[features].values
+    y_train = train_data['interaction_cnt'].values
+    y_train = np.log(y_train + 1)
 
+    # 数据标准化
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(x_train)
+    joblib.dump(scaler, '../models/tf-scaler1.pkl')
 
-data_gen = data_generator()
+    # 初始化模型
+    input_size = x_train.shape[1]
+    model = XTransformer(input_dim=input_size, dim=64, depth=4, heads=4)
+    # model = EnhancedInteractionPredictor(input_size)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 训练循环
-for i in tqdm(range(NUM_BATCHES), mininterval=10., desc='training'):
-    model.train()
+    # 创建数据集和数据加载器
+    x_train = torch.tensor(x_train, dtype=torch.float32).to(device)
+    y_train = torch.tensor(y_train, dtype=torch.float32).to(device)
+    train_dataset = CustomDataset(x_train, y_train)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
-    src, tgt, src_mask = next(data_gen)
+    # 定义损失函数和优化器
+    criterion = nn.HuberLoss()
+    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+    # criterion = LogCoshLoss()
+    # optimizer = optim.NAdam(model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=1e-5)  # 学习率调度器
+    # 训练模型
+    num_epochs = 50
+    model.to(device)
 
-    # 前向传播（预测 tgt 序列）
-    pred = model(src, mask=src_mask)
+    for epoch in range(num_epochs):
+        model.train()
+        epoch_strat_time = time.time()
+        running_loss = 0.0
+        score = 0.0
+        for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
 
-    # 计算损失（使用均方误差，适合连续值预测）
-    loss = torch.nn.functional.mse_loss(pred, tgt)
-    loss.backward()
-    print(f'{i}: {loss.item()}')
+            # 转换回原始尺度并计算绝对值之差
+            original_labels = torch.exp(labels)  # y = exp(log(y))
+            original_outputs = torch.exp(outputs)  # pred = exp(log(pred))
+            abs_diff = torch.abs(original_labels - original_outputs)
 
-    optim.step()
-    optim.zero_grad()
+            score += abs_diff.sum().item()
+            running_loss += loss.item()
 
-    if i != 0 and i % GENERATE_EVERY == 0:
-        model.eval()
-        src, _, src_mask = next(data_gen)
-        src, src_mask = src[:1], src_mask[:1]  # 取一个样本测试
+        epoch_end_time = time.time()
+        # 计算评分
+        print(f'Epoch {epoch + 1}/{num_epochs}, '
+              f'xTrain Len {len(x_train)}, '
+              f'Loss: {running_loss / len(train_loader)}, '
+              f'Score: {score / len(x_train)}, '
+              f'Running Time: {epoch_end_time - epoch_strat_time}')
 
-        # 自回归生成预测序列
-        sample = model.generate(src, seq_len=DEC_SEQ_LEN, mask=src_mask)
-
-        # 计算预测误差（均方误差）
-        mse_error = torch.nn.functional.mse_loss(sample, src)
-        print(f"input shape:  {src.shape}")
-        print(f"predicted shape:  {sample.shape}")
-        print(f"MSE error: {mse_error.item()}")
+    # 保存模型
+    torch.save(model, '../models/tf-model1.pth')
