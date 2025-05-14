@@ -42,10 +42,11 @@ if __name__ == '__main__':
         predictions = predictions.floor().int()
 
     zeros = np.zeros(y_test.shape)
-    prediction_interaction_cnt = predictions.numpy().flatten()
+    prediction_interaction_cnt = predictions.cpu().numpy().flatten()
     print(f'len of prediction_interaction_cnt: {len(prediction_interaction_cnt)}')
     # zeros = np.zeros(prediction_interaction_cnt.shape)
 
+    # absolute_errors = np.abs(zeros - y_test)
     absolute_errors = np.abs(prediction_interaction_cnt - y_test)
     print(f'len of absolute_errors: {len(absolute_errors)}')
     absolute_errors_sum = np.sum(absolute_errors)

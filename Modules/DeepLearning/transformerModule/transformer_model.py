@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
                 'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
-                'avg_fans_per_video']
+                'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
     x_train = train_data[features].values
     y_train = train_data['interaction_cnt'].values
     y_train = np.log(y_train + 1)
@@ -30,11 +30,11 @@ if __name__ == '__main__':
     # 数据标准化
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
-    joblib.dump(scaler, '../models/tf-scaler5.pkl')
+    joblib.dump(scaler, '../models/tf-scaler7.pkl')
 
     # 初始化模型
     input_size = x_train.shape[1]
-    model = XTransformer(input_dim=input_size, dim=64, depth=4, heads=4)
+    model = XTransformer(input_dim=input_size, dim=64, depth=8, heads=4)
     # model = EnhancedInteractionPredictor(input_size)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -45,13 +45,13 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
     # 定义损失函数和优化器
-    criterion = nn.HuberLoss()
-    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
-    # criterion = LogCoshLoss()
-    # optimizer = optim.NAdam(model.parameters(), lr=0.001)
+    # criterion = nn.HuberLoss()
+    # optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+    criterion = LogCoshLoss()
+    optimizer = optim.NAdam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=1e-5)  # 学习率调度器
     # 训练模型
-    num_epochs = 50
+    num_epochs = 200
     model.to(device)
 
     for epoch in range(num_epochs):
@@ -85,4 +85,4 @@ if __name__ == '__main__':
               f'Running Time: {epoch_end_time - epoch_strat_time}')
 
     # 保存模型
-    torch.save(model, '../models/tf-model5.pth')
+    torch.save(model, '../models/tf-model7.pth')

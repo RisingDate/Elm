@@ -189,11 +189,15 @@ def data_process(path, is_train=True):
     data['avg_coin_per_video'] = data['coin_cnt'] / (data['video_cnt'] + 1)
     # 作品均获粉丝数
     data['avg_fans_per_video'] = data['fans_cnt'] / (data['video_cnt'] + 1)
+    # 不同平台作品主帖类型
+    data['site_post'] = data['site_id']*10 + data['post_type']
+    # 不同平台作者年龄段指标
+    data['site_age_group'] = data['site_id']*100 + data['age']
+    # 不同平台城市水平影响
+    data['site_city'] = data['site_id']*10 + data['city_level']
 
     data['user_site'] = str(data['uid']) + '_' + str(data['site_id'])
     data['user_post'] = data['uid'] + '_' + str(data['post_type'])
-    data['site_post'] = str(data['site_id']) + '_' + str(data['post_type'])
-    data['site_age_group'] = str(data['site_id']) + '_' + str(data['age'])
 
     return data
 

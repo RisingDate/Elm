@@ -56,7 +56,7 @@ if __name__ == '__main__':
     # 标准化
     scaler = StandardScaler()
     x_numeric = scaler.fit_transform(x_numeric)
-    joblib.dump(scaler, '../models/tf-scaler5.pkl')
+    joblib.dump(scaler, '../models/tf-scaler7.pkl')
 
     # 转为 Tensor
     x_numeric = torch.tensor(x_numeric, dtype=torch.float32)
