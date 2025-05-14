@@ -61,76 +61,58 @@ class InteractionPredictor(nn.Module):
         return self.output(x)
 
 
-class DynamicBatchNorm(nn.BatchNorm1d):
-    def __init__(self, num_features):
-        super().__init__(num_features)
-        self.last_batch_size = None
-
+class Swish(nn.Module):
     def forward(self, x):
-        if self.training and (x.shape[0] != self.last_batch_size):
-            # 动态调整running stats
-            self.reset_running_stats()
-            self.last_batch_size = x.shape[0]
-        return super().forward(x)
+        return x * torch.sigmoid(x)
 
 
 class EnhancedInteractionPredictor(nn.Module):
     def __init__(self, input_size):
-        super().__init__()
-        self.input_proj = nn.Linear(input_size, 256)
+        super(EnhancedInteractionPredictor, self).__init__()
+        self.fc1 = nn.Linear(input_size, 512)
+        self.bn1 = nn.BatchNorm1d(512)
+        self.drop1 = nn.Dropout(0.4)
 
-        self.block1 = nn.Sequential(
-            DynamicBatchNorm(256),
-            nn.GELU(),
-            nn.Dropout(0.4),
-            nn.Linear(256, 128)
-        )
+        self.fc2 = nn.Linear(512, 256)
+        self.bn2 = nn.BatchNorm1d(256)
+        self.drop2 = nn.Dropout(0.35)
 
-        self.block2 = nn.Sequential(
-            DynamicBatchNorm(128),
-            nn.GELU(),
-            nn.Dropout(0.3),
-            nn.Linear(128, 64)
-        )
+        self.fc3 = nn.Linear(256, 128)
+        self.bn3 = nn.BatchNorm1d(128)
+        self.drop3 = nn.Dropout(0.3)
 
-        self.output = nn.Sequential(
-            DynamicBatchNorm(64),
-            nn.Linear(64, 1),
-            nn.Softplus()
-        )
+        self.fc4 = nn.Linear(128, 64)
+        self.bn4 = nn.BatchNorm1d(64)
+        self.drop4 = nn.Dropout(0.25)
+
+        self.residual = nn.Linear(input_size, 64)
+
+        self.output = nn.Linear(64, 1)
 
         self._init_weights()
 
     def _init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                nn.init.orthogonal_(m.weight)  # 更适合回归任务的初始化
+                nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        x = self.input_proj(x)
-        x = self.block1(x) + x[:, :128]  # 残差连接
-        x = self.block2(x) + x[:, :64]
-        return self.output(x)
+        out = F.relu(self.bn1(self.fc1(x)))
+        out = self.drop1(out)
 
-# # 评估模型
-# model.eval()
-# y_pred = []
-# with torch.no_grad():
-#     for inputs, _ in test_loader:
-#         inputs = inputs.to(device)
-#         outputs = model(inputs)
-#         y_pred.extend(outputs.cpu().numpy().flatten())
-#
-# mse = mean_squared_error(y_test, y_pred)
-# r2 = r2_score(y_test, y_pred)
-# print(f'Mean Squared Error: {mse}')
-# print(f'R-squared: {r2}')
-#
-#
-#
-# # 保存整个模型
-# torch.save(model, './models/model1.pth')
-# # 加载整个模型
-# loaded_model = torch.load('full_model.pth')
-# loaded_model.eval()  # 设置为评估模式
+        out = F.relu(self.bn2(self.fc2(out)))
+        out = self.drop2(out)
+
+        out = F.relu(self.bn3(self.fc3(out)))
+        out = self.drop3(out)
+
+        out = F.relu(self.bn4(self.fc4(out)))
+        out = self.drop4(out)
+
+        residual = self.residual(x)
+        out = out + residual
+
+        out = self.output(out)
+        out = F.relu(out)  # 保证预测非负
+        return out

@@ -19,9 +19,12 @@ class LogCoshLoss(nn.Module):
 if __name__ == '__main__':
     path = '../../../Dataset/A/train_data.txt'
     train_data = data_process(path)
+    str_col = ['user_site', 'user_post', 'site_post', 'site_age_group']
+
+
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
                 'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
-                'avg_fans_per_video']  # 替换为实际的特征列名
+                'avg_fans_per_video', 'user_site', 'user_post', 'site_post', 'site_age_group']  # 替换为实际的特征列名
     x_train = train_data[features].values
     y_train = train_data['interaction_cnt'].values
     y_train = np.log(y_train + 1)
@@ -29,7 +32,7 @@ if __name__ == '__main__':
     # 数据标准化
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
-    joblib.dump(scaler, '../models/tf-scaler1.pkl')
+    joblib.dump(scaler, '../models/tf-scaler5.pkl')
 
     # 初始化模型
     input_size = x_train.shape[1]
@@ -84,4 +87,4 @@ if __name__ == '__main__':
               f'Running Time: {epoch_end_time - epoch_strat_time}')
 
     # 保存模型
-    torch.save(model, '../models/tf-model1.pth')
+    torch.save(model, '../models/tf-model5.pth')

@@ -189,5 +189,11 @@ def data_process(path, is_train=True):
     data['avg_coin_per_video'] = data['coin_cnt'] / (data['video_cnt'] + 1)
     # 作品均获粉丝数
     data['avg_fans_per_video'] = data['fans_cnt'] / (data['video_cnt'] + 1)
+
+    data['user_site'] = str(data['uid']) + '_' + str(data['site_id'])
+    data['user_post'] = data['uid'] + '_' + str(data['post_type'])
+    data['site_post'] = str(data['site_id']) + '_' + str(data['post_type'])
+    data['site_age_group'] = str(data['site_id']) + '_' + str(data['age'])
+
     return data
 

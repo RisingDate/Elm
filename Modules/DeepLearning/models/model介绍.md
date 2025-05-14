@@ -210,6 +210,184 @@ features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt', 'video_cn
 
 **提交得分：**
 
+
+
+## model 11
+
+**模型：**EnhancedInteractionPredictor
+
+**优化器：**optimizer = optim.AdamW(model.parameters(), lr=5e-4, weight_decay=1e-4)
+
+**损失函数：**criterion = nn.HuberLoss()
+
+**特征列：**
+
+```
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+            'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+            'avg_fans_per_video']
+```
+
+**损失函数值：**
+
+**得分：**
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
+## tf-model 1
+
+**模型：**XTransformer(input_dim=x_train.shape[1], dim=64, depth=4, heads=4)
+
+**优化器：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+**损失函数：**criterion = nn.HuberLoss()
+
+**特征列：**
+
+```
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video', 'avg_fans_per_video']
+```
+
+**损失函数值：**
+
+**得分：**Score: 28.267368204800437
+
+**对应输出文件：**output-250514-2-tf
+
+**提交得分：**
+
+
+
+## tf-model 2
+
+**模型：**XTransformer(input_dim=x_train.shape[1], dim=64, depth=4, heads=4)
+
+**优化器：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+**损失函数：**criterion = nn.HuberLoss()
+
+**特征列：**
+
+```
+features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt',
+            'video_cnt', 'post_type', 'authority_popularity', 'fans_video_ratio',
+            'avg_coin_per_video', 'avg_fans_per_video']
+```
+
+**损失函数值：**Loss: 0.3183
+
+**得分：**Score: 28.562219660568154
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
+## tf-model 3
+
+**模型：**XTransformer(input_dim=x_train.shape[1], dim=64, **depth=8**, heads=4)
+
+**优化器：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+**损失函数：**criterion = nn.HuberLoss()
+
+**特征列：**
+
+```
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt', 'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video', 'avg_fans_per_video']
+```
+
+**损失函数值：**Loss: 0.313083
+
+**得分：**Score: 28.29616969309609
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
+## tf-model 4
+
+**模型：**XTransformer(input_dim=x_train.shape[1], dim=64, **depth=8**, heads=4)
+
+**优化器：**optimizer = optim.NAdam(model.parameters(), lr=0.001)
+
+**损失函数：**criterion = LogCoshLoss()
+
+**特征列：**
+
+```
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+                'avg_fans_per_video']
+```
+
+**损失函数值：**Loss: 0.27730889
+
+**得分：**Score: 28.579653491902256
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
+## tf-model 5
+
+**模型：**XTransformer(input_dim=x_train.shape[1], dim=64, depth=4, heads=4)
+
+**优化器：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+**损失函数：**criterion = nn.HuberLoss()
+
+**特征列：**
+
+```
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+                'avg_fans_per_video', 'user_site', 'user_post', 'site_post', 'site_age_group']
+```
+
+**损失函数值：**
+
+**得分：**
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
+## tf-model 6
+
+**模型：**XTransformer(input_dim=x_train.shape[1], dim=64, **depth=10**, heads=4)
+
+**优化器：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+**损失函数：**criterion = nn.HuberLoss()
+
+**特征列：**
+
+```
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+                'avg_fans_per_video', 'user_site', 'user_post', 'site_post', 'site_age_group']
+```
+
+**损失函数值：**
+
+**得分：**Score: 28.286650992387322
+
+**对应输出文件：**
+
+**提交得分：**
+
 ## model-with-2-feature
 
 **优化器：**optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
