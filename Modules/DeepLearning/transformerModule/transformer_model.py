@@ -6,7 +6,7 @@ import torch.nn as nn
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 import joblib
-
+from sklearn.preprocessing import LabelEncoder
 from dataProcess import data_process, CustomDataset
 from model import XTransformer
 
@@ -19,12 +19,10 @@ class LogCoshLoss(nn.Module):
 if __name__ == '__main__':
     path = '../../../Dataset/A/train_data.txt'
     train_data = data_process(path)
-    str_col = ['user_site', 'user_post', 'site_post', 'site_age_group']
-
 
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
                 'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
-                'avg_fans_per_video', 'user_site', 'user_post', 'site_post', 'site_age_group']  # 替换为实际的特征列名
+                'avg_fans_per_video']
     x_train = train_data[features].values
     y_train = train_data['interaction_cnt'].values
     y_train = np.log(y_train + 1)
