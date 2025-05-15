@@ -9,8 +9,8 @@ data = pd.read_csv(file_path, sep='\t')
 train_data, test_data = train_test_split(data, test_size=0.3, random_state=42)
 
 # 保存训练集和测试集到两个文件
-# train_data.to_csv("../../Dataset/A/train_data.txt", index=False, sep='\t', header=True)
-# test_data.to_csv("../../Dataset/A/test_data.txt", index=False, sep='\t', header=True)
+train_data.to_csv("../../Dataset/A/train_data.txt", index=False, sep='\t', header=True)
+test_data.to_csv("../../Dataset/A/test_data.txt", index=False, sep='\t', header=True)
 train_data.to_csv("../../Dataset/A/train_data.csv", index=False, header=True, encoding="utf-8-sig")
 test_data.to_csv("../../Dataset/A/test_data.csv", index=False, header=True, encoding="utf-8-sig")
 

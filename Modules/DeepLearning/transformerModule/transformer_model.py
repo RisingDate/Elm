@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 import joblib
 from sklearn.preprocessing import LabelEncoder
 from dataProcess import data_process, CustomDataset
-from model import XTransformer
+from model import XTransformer, TabTransformer
 
 
 class LogCoshLoss(nn.Module):
@@ -18,9 +18,9 @@ class LogCoshLoss(nn.Module):
 
 params = {
     'train_data_path': '../../../Dataset/A/train_data.txt',
-    'label_encoders_save_path': '../models/label_encoders9.pkl',
-    'scaler_save_path': '../models/tf-scaler9.pkl',
-    'model_save_path': '../models/tf-model9.pth'
+    'label_encoders_save_path': '../models/label_encoders10.pkl',
+    'scaler_save_path': '../models/tf-scaler10.pkl',
+    'model_save_path': '../models/tf-model10.pth'
 }
 if __name__ == '__main__':
     path = params['train_data_path']
@@ -40,7 +40,11 @@ if __name__ == '__main__':
 
     # 初始化模型
     input_size = x_train.shape[1]
-    model = XTransformer(input_dim=input_size, dim=64, depth=4, heads=4)
+    # model = XTransformer(input_dim=input_size, dim=64, depth=4, heads=4)
+    model = TabTransformer(
+        num_numeric_features=input_size,
+        embed_dim=16, dim=64, depth=4, heads=4
+    )
     # model = EnhancedInteractionPredictor(input_size)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

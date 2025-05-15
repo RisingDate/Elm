@@ -430,7 +430,7 @@ epoch = 200
 
 
 
-## tf-model 8
+## tf-model 8（过拟合）
 
 **模型：**
 
@@ -462,6 +462,44 @@ numeric_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gende
 **损失函数值：**
 
 **得分：**
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
+## tf-model 9
+
+**模型：**
+
+```
+model = TabTransformer(
+        num_numeric_features=len(numeric_features),
+        categorical_info=categorical_info,
+        embed_dim=16,
+        dim=64,
+        depth=4,
+        heads=4
+    ).to(device)
+```
+
+**优化器：**optimizer = optim.NAdam(model.parameters(), lr=0.001)
+
+**损失函数：**criterion = LogCoshLoss()
+
+**特征列：**
+
+```
+categorical_features = ['site_id', 'gender', 'post_type', 'city_level']
+numeric_features = ['statistical_duration', 'publish_weekday', 'age', 'fans_cnt', 'coin_cnt',
+					'video_cnt', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+					'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
+```
+
+**损失函数值：**0.2954
+
+**得分：**31.8903
 
 **对应输出文件：**
 
