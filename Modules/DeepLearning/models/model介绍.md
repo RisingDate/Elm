@@ -391,7 +391,7 @@ features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age
 
 
 
-## **tf-model 7
+## **tf-model 7(记错了)
 
 **模型：**
 
@@ -414,9 +414,9 @@ model = XTransformerWithEmbedding(
 **特征列：**
 
 ```
-numeric_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
-                    'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
-                    'avg_coin_per_video', 'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+            'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
+            'avg_coin_per_video', 'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
 epoch = 200
 ```
 
@@ -455,8 +455,8 @@ model = XTransformerWithEmbedding(
 ```
 str_features = ['user_site', 'user_post', 'uid']
 numeric_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
-                        'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
-                        'avg_coin_per_video', 'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
+                    'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
+                    'avg_coin_per_video', 'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
 ```
 
 **损失函数值：**
@@ -475,13 +475,9 @@ numeric_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gende
 
 ```
 model = TabTransformer(
-        num_numeric_features=len(numeric_features),
-        categorical_info=categorical_info,
-        embed_dim=16,
-        dim=64,
-        depth=4,
-        heads=4
-    ).to(device)
+        num_numeric_features=input_size,
+        embed_dim=16, dim=64, depth=4, heads=4
+    )
 ```
 
 **优化器：**optimizer = optim.NAdam(model.parameters(), lr=0.001)
@@ -491,15 +487,14 @@ model = TabTransformer(
 **特征列：**
 
 ```
-categorical_features = ['site_id', 'gender', 'post_type', 'city_level']
-numeric_features = ['statistical_duration', 'publish_weekday', 'age', 'fans_cnt', 'coin_cnt',
-					'video_cnt', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
-					'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
+features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+            'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+            'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
 ```
 
-**损失函数值：**0.2954
+**损失函数值：**
 
-**得分：**31.8903
+**得分：**
 
 **对应输出文件：**
 

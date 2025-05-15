@@ -18,13 +18,11 @@ class LogCoshLoss(nn.Module):
 
 params = {
     'train_data_path': '../../../Dataset/A/train_data.txt',
-    'label_encoders_save_path': '../models/label_encoders10.pkl',
-    'scaler_save_path': '../models/tf-scaler10.pkl',
-    'model_save_path': '../models/tf-model10.pth'
+    'scaler_save_path': '../models/tf-scaler-all_data.pkl',
+    'model_save_path': '../models/tf-model-all_data.pth'
 }
 if __name__ == '__main__':
-    path = params['train_data_path']
-    train_data = data_process(path)
+    train_data = data_process(params['train_data_path'])
 
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
                 'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
@@ -40,12 +38,19 @@ if __name__ == '__main__':
 
     # 初始化模型
     input_size = x_train.shape[1]
-    # model = XTransformer(input_dim=input_size, dim=64, depth=4, heads=4)
-    model = TabTransformer(
-        num_numeric_features=input_size,
-        embed_dim=16, dim=64, depth=4, heads=4
+    model = XTransformer(
+        input_dim=input_size,
+        dim=64,
+        depth=8,
+        heads=4
     )
-    # model = EnhancedInteractionPredictor(input_size)
+    # model = TabTransformer(
+    #     num_numeric_features=input_size,
+    #     embed_dim=16,
+    #     dim=64,
+    #     depth=4,
+    #     heads=4
+    # )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 创建数据集和数据加载器
@@ -55,10 +60,10 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
     # 定义损失函数和优化器
-    # criterion = nn.HuberLoss()
-    # optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
-    criterion = LogCoshLoss()
-    optimizer = optim.NAdam(model.parameters(), lr=0.001)
+    criterion = nn.HuberLoss()
+    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+    # criterion = LogCoshLoss()
+    # optimizer = optim.NAdam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=1e-5)  # 学习率调度器
     # 训练模型
     num_epochs = 50
