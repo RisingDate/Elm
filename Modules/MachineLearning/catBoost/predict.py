@@ -9,7 +9,7 @@ from dataProcess import data_process
 params = {
     'test_data_path': '../../../Dataset/A/test_data.txt',
     # 'test_data_path': '../../../Dataset/B/B.txt',
-    'model_path': '../models/catboost_model.cbm',
+    'model_path': '../models/stacking-catboost_model.cbm',
     'save_txt_path': '../results/catboost_output.txt',
     'save_csv_path': '../results/catboost_output.csv'
 }
@@ -20,6 +20,9 @@ numeric_features = ['statistical_duration', 'publish_weekday', 'age', 'fans_cnt'
                     'video_cnt', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
                     'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
 all_features = categorical_features + numeric_features
+all_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+                'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
 
 # 读取测试数据
 if params['test_data_path'] != '../../../Dataset/B/B.txt':
