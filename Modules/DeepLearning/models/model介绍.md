@@ -351,8 +351,8 @@ features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age
 ```
 str_features = ['user_site', 'user_post', 'site_post', 'site_age_group']
 features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
-                'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
-                'avg_fans_per_video']
+            'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+            'avg_fans_per_video']
 ```
 
 **损失函数值：**Loss: 0.0972

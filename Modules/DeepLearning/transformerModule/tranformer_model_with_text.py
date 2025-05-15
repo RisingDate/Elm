@@ -30,24 +30,30 @@ class CustomDatasetWithCat(Dataset):
         return self.x_numeric[idx], cat_inputs, self.y[idx]
 
 
+params = {
+    'train_data_path': '../../../Dataset/A/train_data.txt',
+    'label_encoders_save_path': '../models/label_encoders8.pkl',
+    'scaler_save_path': '../models/tf-scaler8-with-text.pkl',
+    'model_save_path': '../models/tf-model8-with-text.pth'
+}
 if __name__ == '__main__':
-    path = '../../../Dataset/A/train_data.txt'
+    path = params['train_data_path']
     train_data = data_process(path)
 
     # 处理分类特征
-    str_features = ['user_site', 'user_post', 'site_post', 'site_age_group']
+    str_features = ['user_site', 'user_post', 'uid']
     label_encoders = {}
     for col in str_features:
         le = LabelEncoder()
         train_data[col] = le.fit_transform(train_data[col])
         label_encoders[col] = le
-    joblib.dump(label_encoders, 'label_encoders.pkl')
+    joblib.dump(label_encoders, params['label_encoders_save_path'])
     categorical_info = {col: train_data[col].nunique() for col in str_features}
 
     # 处理数值特征
     numeric_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
                         'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
-                        'avg_coin_per_video', 'avg_fans_per_video']
+                        'avg_coin_per_video', 'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
     x_numeric = train_data[numeric_features].values
     y_train = train_data['interaction_cnt'].values
     y_train = np.log(y_train + 1)
@@ -55,7 +61,7 @@ if __name__ == '__main__':
     # 标准化
     scaler = StandardScaler()
     x_numeric = scaler.fit_transform(x_numeric)
-    joblib.dump(scaler, '../models/tf-scaler7.pkl')
+    joblib.dump(scaler, params['scaler_save_path'])
 
     # 转为 Tensor
     x_numeric = torch.tensor(x_numeric, dtype=torch.float32)
@@ -117,4 +123,4 @@ if __name__ == '__main__':
               f'Score: {score / len(x_numeric):.4f}, '
               f'Running Time: {epoch_end_time - epoch_strat_time:.2f}s')
 
-    torch.save(model, '../models/tf-model5.pth')
+    torch.save(model, params['model_save_path'])
