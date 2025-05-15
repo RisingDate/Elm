@@ -72,10 +72,10 @@ class XTransformerWithEmbedding(nn.Module):
 
 
 class TabTransformer(nn.Module):
-    def __init__(self, num_numeric_features, categorical_info, embed_dim=32, dim=64, depth=4, heads=4, dropout=0.1):
+    def __init__(self, num_numeric_features, categorical_info, embed_dim=16, dim=64, depth=4, heads=4, dropout=0.1):
         super().__init__()
 
-        # Embedding for categorical features
+        # 分类特征 embedding
         self.embeddings = nn.ModuleDict({
             name: nn.Embedding(num_categories, embed_dim)
             for name, num_categories in categorical_info.items()
@@ -84,39 +84,43 @@ class TabTransformer(nn.Module):
         self.cls_token = nn.Parameter(torch.zeros(1, 1, dim))
         self.cat_proj = nn.Linear(embed_dim, dim)
 
-        # Transformer encoder blocks for categorical features
         self.transformer = nn.Sequential(*[
             XTransformerBlock(dim, heads, dropout) for _ in range(depth)
         ])
 
-        total_cat = len(categorical_info)
         self.numeric_proj = nn.Sequential(
             nn.LayerNorm(num_numeric_features),
             nn.Linear(num_numeric_features, dim)
         )
 
-        # Final prediction head
+        # 添加 MLP 融合层
+        self.combined_proj = nn.Sequential(
+            nn.Linear(dim * 2, dim),
+            nn.ReLU(),
+            nn.Dropout(0.2)
+        )
+
         self.output_head = nn.Sequential(
-            nn.LayerNorm(dim * 2),
-            nn.Linear(dim * 2, 1)
+            nn.LayerNorm(dim),
+            nn.Linear(dim, 1)
         )
 
     def forward(self, x_numeric, x_categorical_dict):
         B = x_numeric.size(0)
 
-        # Process categorical features
+        # 类别特征嵌入并编码
         embed_list = [self.embeddings[k](x_categorical_dict[k]) for k in self.embeddings]
         embed_cat = torch.stack(embed_list, dim=1)  # -> (B, num_cat, embed_dim)
         embed_cat = self.cat_proj(embed_cat)        # -> (B, num_cat, dim)
 
         cls_tokens = self.cls_token.expand(B, -1, -1)       # -> (B, 1, dim)
         x_cat = torch.cat([cls_tokens, embed_cat], dim=1)   # -> (B, 1 + num_cat, dim)
-
         x_cat = self.transformer(x_cat)                     # -> (B, 1 + num_cat, dim)
         x_cat_cls = x_cat[:, 0]                             # -> (B, dim)
 
-        # Process numeric features
+        # 数值特征
         x_num = self.numeric_proj(x_numeric)                # -> (B, dim)
 
         x = torch.cat([x_cat_cls, x_num], dim=-1)           # -> (B, dim*2)
+        x = self.combined_proj(x)                           # -> (B, dim)
         return self.output_head(x)                          # -> (B, 1)

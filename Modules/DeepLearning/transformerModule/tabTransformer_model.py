@@ -62,9 +62,14 @@ if __name__ == '__main__':
 
     # 模型初始化
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = TabTransformer(num_numeric_features=len(numeric_features),
-                           categorical_info=categorical_info,
-                           embed_dim=32, dim=64, depth=4, heads=4).to(device)
+    model = TabTransformer(
+        num_numeric_features=len(numeric_features),
+        categorical_info=categorical_info,
+        embed_dim=16,
+        dim=64,
+        depth=4,
+        heads=4
+    ).to(device)
 
     criterion = LogCoshLoss()
     optimizer = optim.NAdam(model.parameters(), lr=0.001)

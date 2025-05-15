@@ -308,7 +308,7 @@ features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age
 
 **对应输出文件：**output-250514-4-tf.txt
 
-**提交得分：**
+**提交得分：**31.2913
 
 
 
@@ -424,7 +424,7 @@ epoch = 200
 
 **得分：**27.751429517102846
 
-**对应输出文件：**
+**对应输出文件：**output-250515-1-tf.txt
 
 **提交得分：**
 
