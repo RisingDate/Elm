@@ -15,6 +15,9 @@ import lightgbm as lgb
 
 # 参数
 data_path = '../../../Dataset/A/train_data.txt'
+transformer_model_path = '../models/xtransform_fold.pth'  # 替换为你保存的模型
+catboost_model_path = '../models/catboost_model.cbm'
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 特征
@@ -56,6 +59,7 @@ oof_tf = np.zeros(len(df))
 
 print('============正在训练融合模型=============')
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
+epochs = 50
 
 for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
     print(f"Fold: {fold+1}")
@@ -68,6 +72,8 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
     cb_model = CatBoostRegressor(verbose=0)
     cb_model.fit(X_train, y_train, cat_features=categorical_features)
     oof_cb[val_idx] = cb_model.predict(X_val)
+    catboost_model_path = f'../models/catboost_fold{fold}.cbm'
+    cb_model.save_model(catboost_model_path)
 
     print('============XTransformer训练中=============')
     # ✅ 2. XTransformer
@@ -81,7 +87,7 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
     loader = DataLoader(CustomDataset(xtrain_tf, ytrain_tf), batch_size=64, shuffle=True)
 
     model.train()
-    for epoch in range(50):  # 可增加轮数
+    for epoch in range(epochs):  # 可增加轮数
         epoch_start_time = time.time()
         running_loss = 0
         model_preds = []
@@ -102,7 +108,7 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
         epoch_end_time = time.time()
         mae = mean_absolute_error(np.expm1(y_true), np.expm1(model_preds))
 
-        print(f'Fold: {fold}  -> Epoch {epoch+1}/{50} | '
+        print(f'Fold: {fold + 1} -> Epoch {epoch+1}/{epochs} | '
               f'Loss: {running_loss / len(loader)} | '
               f'MAE Score: {mae:.4f} | '
               f'Running Time: {epoch_end_time - epoch_start_time}s')
@@ -111,6 +117,8 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
     with torch.no_grad():
         pred_val_tf = model(xval_tf).squeeze().cpu().numpy()
         oof_tf[val_idx] = pred_val_tf
+    transformer_save_path = f'../models/xtransform_fold{fold}.pth'
+    torch.save(model.state_dict(), transformer_save_path)
 
 # 构建 stacking 输入
 stacking_X = np.vstack([oof_cb, oof_tf]).T  # shape: (n_samples, 2)
