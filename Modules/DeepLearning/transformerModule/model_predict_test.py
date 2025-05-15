@@ -9,8 +9,8 @@ from dataProcess import data_process
 
 params = {
     'test_data_path': '../../../Dataset/A/test_data.txt',
-    'model_path': '../models/tf-model7.pth',
-    'scaler_path': '../models/tf-scaler7.pkl',
+    'model_path': '../models/tf-model9.pth',
+    'scaler_path': '../models/tf-scaler9.pkl',
 }
 
 if __name__ == '__main__':

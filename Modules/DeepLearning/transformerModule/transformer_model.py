@@ -17,9 +17,10 @@ class LogCoshLoss(nn.Module):
 
 
 params = {
-    'train_data_path': '../../../Dataset/A/train.txt',
-    'scaler_save_path': '../models/tf-scaler-all_data.pkl',
-    'model_save_path': '../models/tf-model-all_data.pth'
+    'train_data_path': '../../../Dataset/A/train_data.txt',
+    'label_encoders_save_path': '../models/label_encoders10.pkl',
+    'scaler_save_path': '../models/tf-scaler10.pkl',
+    'model_save_path': '../models/tf-model10.pth'
 }
 if __name__ == '__main__':
     train_data = data_process(params['train_data_path'])
@@ -41,16 +42,9 @@ if __name__ == '__main__':
     model = XTransformer(
         input_dim=input_size,
         dim=64,
-        depth=8,
+        depth=4,
         heads=4
     )
-    # model = TabTransformer(
-    #     num_numeric_features=input_size,
-    #     embed_dim=16,
-    #     dim=64,
-    #     depth=4,
-    #     heads=4
-    # )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 创建数据集和数据加载器

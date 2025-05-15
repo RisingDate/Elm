@@ -1,4 +1,4 @@
-# model介绍
+# DL Model
 
 ## model 1
 
@@ -480,9 +480,9 @@ model = TabTransformer(
     )
 ```
 
-**优化器：**optimizer = optim.NAdam(model.parameters(), lr=0.001)
+**优化器：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
 
-**损失函数：**criterion = LogCoshLoss()
+**损失函数：**criterion = nn.HuberLoss()
 
 **特征列：**
 
@@ -492,9 +492,9 @@ features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age
             'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
 ```
 
-**损失函数值：**
+**损失函数值：**Loss: 0.3194159
 
-**得分：**
+**得分：**Score: 29.39863839209286
 
 **对应输出文件：**
 
@@ -536,9 +536,69 @@ features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age
 
 
 
+# ML Model
 
+## catBoost
+
+**模型：**
 
 ```
-
+model = CatBoostRegressor(
+    iterations=1000,
+    learning_rate=0.05,
+    depth=6,
+    loss_function='RMSE',
+    cat_features=categorical_features,
+    verbose=100
+)
 ```
 
+**特征列：**
+
+```
+categorical_features = ['site_id', 'gender', 'post_type', 'city_level', 'user_site', 'user_post']
+numeric_features = ['statistical_duration', 'publish_weekday', 'age', 'fans_cnt', 'coin_cnt',
+                    'video_cnt', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+                    'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
+
+all_features = categorical_features + numeric_features
+```
+
+**得分：**28.1161
+
+**对应输出文件：**catboost_output.txt
+
+**提交得分：**
+
+
+
+## lightGbm
+
+**模型：**
+
+```
+params = {
+    'objective': 'regression',
+    'metric': 'mae',
+    'learning_rate': 0.05,
+    'max_depth': 6,
+    'num_leaves': 31,
+    'verbose': -1
+}
+```
+
+**特征列：**
+
+```
+categorical_features = ['site_id', 'gender', 'post_type', 'city_level', 'user_site', 'user_post']
+numeric_features = ['statistical_duration', 'publish_weekday', 'age', 'fans_cnt', 'coin_cnt',
+                    'video_cnt', 'authority_popularity', 'fans_video_ratio', 'avg_coin_per_video',
+                    'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
+all_features = categorical_features + numeric_features
+```
+
+**得分：**30.1989
+
+**对应输出文件：**lightgbm_output.txt
+
+**提交得分：**
