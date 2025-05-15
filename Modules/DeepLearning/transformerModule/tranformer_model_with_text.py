@@ -47,8 +47,7 @@ if __name__ == '__main__':
     # 处理数值特征
     numeric_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
                         'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
-                        'avg_coin_per_video',
-                        'avg_fans_per_video']
+                        'avg_coin_per_video', 'avg_fans_per_video']
     x_numeric = train_data[numeric_features].values
     y_train = train_data['interaction_cnt'].values
     y_train = np.log(y_train + 1)

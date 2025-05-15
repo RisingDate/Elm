@@ -9,10 +9,10 @@ from dataProcess import data_process, CustomDataset
 
 params = {
     'test_data_path': '../../../Dataset/B/B.txt',
-    'model_path': '../models/tf-model1.pth',
-    'scaler_path': '../models/tf-scaler1.pkl',
-    'save_txt_path': '../results/B/output-250514-2-tf.txt',
-    'save_csv_path': '../results/B/output-250514-2-tf.csv'
+    'model_path': '../models/tf-model3.pth',
+    'scaler_path': '../models/tf-scaler3.pkl',
+    'save_txt_path': '../results/B/output-250514-4-tf.txt',
+    'save_csv_path': '../results/B/output-250514-4-tf.csv'
 }
 
 if __name__ == '__main__':

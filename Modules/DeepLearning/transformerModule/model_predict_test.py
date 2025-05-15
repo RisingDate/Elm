@@ -5,12 +5,12 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 import joblib
 
-from dataProcess import data_process, CustomDataset
+from dataProcess import data_process
 
 params = {
     'test_data_path': '../../../Dataset/A/test_data.txt',
-    'model_path': '../models/tf-model6.pth',
-    'scaler_path': '../models/tf-scaler6.pkl'
+    'model_path': '../models/tf-model5.pth',
+    'scaler_path': '../models/tf-scaler5.pkl',
 }
 
 if __name__ == '__main__':
@@ -22,16 +22,13 @@ if __name__ == '__main__':
     model.eval()
 
     test_data = data_process(data_path, True)
+
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
                 'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
                 'avg_coin_per_video', 'avg_fans_per_video']
-    # features = ['site_id', 'statistical_duration', 'fans_cnt', 'coin_cnt',
-    #             'video_cnt', 'post_type', 'authority_popularity', 'fans_video_ratio',
-    #             'avg_coin_per_video', 'avg_fans_per_video']
     x_test = test_data[features].values
     y_test = test_data['interaction_cnt'].values
 
-    # scaler = StandardScaler()
     scaler = joblib.load(params['scaler_path'])
     x_test_scaled = scaler.transform(x_test)
     x_test_tensor = torch.tensor(x_test_scaled, dtype=torch.float32).to(device)
