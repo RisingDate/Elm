@@ -82,7 +82,7 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
     xval_tf = torch.tensor(X_val.values, dtype=torch.float32).to(device)
 
     model = XTransformer(input_dim=X.shape[1], dim=64, depth=4, heads=4).to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
     criterion = torch.nn.HuberLoss()
     loader = DataLoader(CustomDataset(xtrain_tf, ytrain_tf), batch_size=64, shuffle=True)
 
