@@ -19,6 +19,19 @@ class CustomDataset(Dataset):
         return self.X[idx], self.y[idx]
 
 
+class TabDataset(Dataset):
+    def __init__(self, x_numeric, x_categorical, y, categorical_info):
+        self.x_num = torch.tensor(x_numeric, dtype=torch.float32)
+        self.x_cat = {k: torch.tensor(x_categorical[k], dtype=torch.long) for k in categorical_info}
+        self.y = torch.tensor(y, dtype=torch.float32).unsqueeze(1)
+
+    def __len__(self):
+        return len(self.y)
+
+    def __getitem__(self, idx):
+        return {k: v[idx] for k, v in self.x_cat.items()}, self.x_num[idx], self.y[idx]
+
+
 def convert_age(age_str):
     if pd.isna(age_str):
         return 70

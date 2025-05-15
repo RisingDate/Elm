@@ -69,3 +69,54 @@ class XTransformerWithEmbedding(nn.Module):
         x = self.input_proj(x).unsqueeze(1)            # (B, 1, dim)
         x = self.transformer(x).squeeze(1)             # (B, dim)
         return self.output_head(x)                     # (B, 1)
+
+
+class TabTransformer(nn.Module):
+    def __init__(self, num_numeric_features, categorical_info, embed_dim=32, dim=64, depth=4, heads=4, dropout=0.1):
+        super().__init__()
+
+        # Embedding for categorical features
+        self.embeddings = nn.ModuleDict({
+            name: nn.Embedding(num_categories, embed_dim)
+            for name, num_categories in categorical_info.items()
+        })
+
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, dim))
+        self.cat_proj = nn.Linear(embed_dim, dim)
+
+        # Transformer encoder blocks for categorical features
+        self.transformer = nn.Sequential(*[
+            XTransformerBlock(dim, heads, dropout) for _ in range(depth)
+        ])
+
+        total_cat = len(categorical_info)
+        self.numeric_proj = nn.Sequential(
+            nn.LayerNorm(num_numeric_features),
+            nn.Linear(num_numeric_features, dim)
+        )
+
+        # Final prediction head
+        self.output_head = nn.Sequential(
+            nn.LayerNorm(dim * 2),
+            nn.Linear(dim * 2, 1)
+        )
+
+    def forward(self, x_numeric, x_categorical_dict):
+        B = x_numeric.size(0)
+
+        # Process categorical features
+        embed_list = [self.embeddings[k](x_categorical_dict[k]) for k in self.embeddings]
+        embed_cat = torch.stack(embed_list, dim=1)  # -> (B, num_cat, embed_dim)
+        embed_cat = self.cat_proj(embed_cat)        # -> (B, num_cat, dim)
+
+        cls_tokens = self.cls_token.expand(B, -1, -1)       # -> (B, 1, dim)
+        x_cat = torch.cat([cls_tokens, embed_cat], dim=1)   # -> (B, 1 + num_cat, dim)
+
+        x_cat = self.transformer(x_cat)                     # -> (B, 1 + num_cat, dim)
+        x_cat_cls = x_cat[:, 0]                             # -> (B, dim)
+
+        # Process numeric features
+        x_num = self.numeric_proj(x_numeric)                # -> (B, dim)
+
+        x = torch.cat([x_cat_cls, x_num], dim=-1)           # -> (B, dim*2)
+        return self.output_head(x)                          # -> (B, 1)

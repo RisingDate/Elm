@@ -16,8 +16,14 @@ class LogCoshLoss(nn.Module):
         return torch.mean(torch.log(torch.cosh(y_pred - y_true)))
 
 
+params = {
+    'train_data_path': '../../../Dataset/A/train_data.txt',
+    'label_encoders_save_path': '../models/label_encoders9.pkl',
+    'scaler_save_path': '../models/tf-scaler9.pkl',
+    'model_save_path': '../models/tf-model9.pth'
+}
 if __name__ == '__main__':
-    path = '../../../Dataset/A/train_data.txt'
+    path = params['train_data_path']
     train_data = data_process(path)
 
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
@@ -30,11 +36,11 @@ if __name__ == '__main__':
     # 数据标准化
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train)
-    joblib.dump(scaler, '../models/tf-scaler7.pkl')
+    joblib.dump(scaler, params['scaler_save_path'])
 
     # 初始化模型
     input_size = x_train.shape[1]
-    model = XTransformer(input_dim=input_size, dim=64, depth=8, heads=4)
+    model = XTransformer(input_dim=input_size, dim=64, depth=4, heads=4)
     # model = EnhancedInteractionPredictor(input_size)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -51,7 +57,7 @@ if __name__ == '__main__':
     optimizer = optim.NAdam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=1e-5)  # 学习率调度器
     # 训练模型
-    num_epochs = 200
+    num_epochs = 50
     model.to(device)
 
     for epoch in range(num_epochs):
@@ -85,4 +91,4 @@ if __name__ == '__main__':
               f'Running Time: {epoch_end_time - epoch_strat_time}')
 
     # 保存模型
-    torch.save(model, '../models/tf-model7.pth')
+    torch.save(model, params['model_save_path'])

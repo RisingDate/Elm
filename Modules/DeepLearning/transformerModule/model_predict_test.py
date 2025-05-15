@@ -9,8 +9,8 @@ from dataProcess import data_process
 
 params = {
     'test_data_path': '../../../Dataset/A/test_data.txt',
-    'model_path': '../models/tf-model5.pth',
-    'scaler_path': '../models/tf-scaler5.pkl',
+    'model_path': '../models/tf-model7.pth',
+    'scaler_path': '../models/tf-scaler7.pkl',
 }
 
 if __name__ == '__main__':
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
                 'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
-                'avg_coin_per_video', 'avg_fans_per_video']
+                'avg_coin_per_video', 'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
     x_test = test_data[features].values
     y_test = test_data['interaction_cnt'].values
 

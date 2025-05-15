@@ -391,6 +391,84 @@ features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age
 
 
 
+## **tf-model 7
+
+**模型：**
+
+```
+model = XTransformerWithEmbedding(
+    num_numeric_features=len(numeric_features),
+    categorical_info=categorical_info,
+    embed_dim=8,
+    dim=64,
+    depth=8,
+    heads=4,
+    dropout=0.1
+)
+```
+
+**优化器：**optimizer = optim.NAdam(model.parameters(), lr=0.001)
+
+**损失函数：**criterion = LogCoshLoss()
+
+**特征列：**
+
+```
+numeric_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                    'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
+                    'avg_coin_per_video', 'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
+epoch = 200
+```
+
+**损失函数值：**Loss: 0.26350318
+
+**得分：**27.751429517102846
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
+## tf-model 8
+
+**模型：**
+
+```
+model = XTransformerWithEmbedding(
+    num_numeric_features=len(numeric_features),
+    categorical_info=categorical_info,
+    embed_dim=8,
+    dim=64,
+    depth=4,
+    heads=4,
+    dropout=0.1
+)
+```
+
+**优化器：**optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+**损失函数：**criterion = nn.HuberLoss()
+
+**特征列：**
+
+```
+str_features = ['user_site', 'user_post', 'uid']
+numeric_features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age', 'fans_cnt', 'coin_cnt',
+                        'video_cnt', 'post_type', 'city_level', 'authority_popularity', 'fans_video_ratio',
+                        'avg_coin_per_video', 'avg_fans_per_video', 'site_post', 'site_age_group', 'site_city']
+```
+
+**损失函数值：**
+
+**得分：**
+
+**对应输出文件：**
+
+**提交得分：**
+
+
+
 ## model-with-2-feature
 
 **优化器：**optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
@@ -422,3 +500,12 @@ features = ['site_id', 'statistical_duration', 'publish_weekday', 'gender', 'age
 **对应输出文件：**
 
 **提交得分：**
+
+
+
+
+
+```
+
+```
+
