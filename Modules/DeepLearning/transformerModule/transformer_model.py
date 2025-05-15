@@ -17,7 +17,7 @@ class LogCoshLoss(nn.Module):
 
 
 params = {
-    'train_data_path': '../../../Dataset/A/train_data.txt',
+    'train_data_path': '../../../Dataset/A/train.txt',
     'scaler_save_path': '../models/tf-scaler-all_data.pkl',
     'model_save_path': '../models/tf-model-all_data.pth'
 }
