@@ -63,11 +63,13 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
     X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
     y_train, y_val = y[train_idx], y[val_idx]
 
+    print('============CatBoost训练中=============')
     # ✅ 1. CatBoost
     cb_model = CatBoostRegressor(verbose=0)
     cb_model.fit(X_train, y_train, cat_features=categorical_features)
     oof_cb[val_idx] = cb_model.predict(X_val)
 
+    print('============XTransformer训练中=============')
     # ✅ 2. XTransformer
     xtrain_tf = torch.tensor(X_train.values, dtype=torch.float32).to(device)
     ytrain_tf = torch.tensor(y_train, dtype=torch.float32).to(device)
@@ -86,6 +88,7 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
         y_true = []
 
         for xb, yb in loader:
+            yb = yb.squeeze()
             optimizer.zero_grad()
             pred = model(xb).squeeze()
             loss = criterion(pred, yb)
@@ -97,7 +100,7 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
             y_true.extend(yb.detach().cpu().numpy())
 
         epoch_end_time = time.time()
-        mae = mean_absolute_error(y_true, model_preds)
+        mae = mean_absolute_error(np.expm1(y_true), np.expm1(model_preds))
 
         print(f'Fold: {fold}  -> Epoch {epoch+1}/{50} | '
               f'Loss: {running_loss / len(loader)} | '
