@@ -9,12 +9,14 @@ from dataProcess import data_process
 from sklearn.metrics import mean_absolute_error
 
 # ===== 路径配置 =====
-test_data_path = '../../../Dataset/A/test_data.txt'
+test_data_path = '../../../Dataset/B/B.txt'
 catboost_model_path = '../models/stacking-catboost_model.cbm'
-transformer_model_path = '../models/tf-model7.pth'
+transformer_model_path = '../models/tf-model-all_data.pth'
 stacking_model_path = '../models/stacking_meta_lgb.pkl'
-scaler_path = '../models/tf-scaler7.pkl'
-save_path = '../results/B/__stacking_predict_result.csv'
+scaler_path = '../models/tf-scaler-all_data.pkl'
+
+
+save_path = '../results/B/stacking_predict_result.txt'
 
 # ===== 数值特征（共17个）=====
 features = [
@@ -25,7 +27,7 @@ features = [
 ]
 
 # ===== 加载并预处理测试数据 =====
-df = data_process(test_data_path, is_train=True)
+df = data_process(test_data_path, is_train=False)
 scaler = joblib.load(scaler_path)
 df[features] = scaler.transform(df[features])
 X = df[features]
@@ -55,13 +57,15 @@ output_df = pd.DataFrame({
     'id': df.iloc[:, 0],  # 假设第一列是 id
     'interaction_cnt': stacking_preds
 })
-output_df.to_csv(save_path, index=False)
+# output_df.to_csv(save_path, index=False)
+output_df.to_csv(save_path, sep='\t', index=False, header=True)
+output_df.to_csv('../results/B/stacking_predict_result.csv', index=False, header=True)
 print(f"✅ 预测结果已保存至: {save_path}")
 
 # ===== 5️⃣ 如有真实标签，计算 MAE =====
-if 'interaction_cnt' in df.columns:
-    true_vals = np.expm1(np.log1p(df['interaction_cnt'].values))  # 防止误差
-    mae = mean_absolute_error(true_vals, stacking_preds)
-    print(f"📊 测试集 MAE: {mae:.4f}")
-else:
-    print("⚠️ 测试集中无 interaction_cnt 列，跳过 MAE 计算。")
+# if 'interaction_cnt' in df.columns:
+#     true_vals = np.expm1(np.log1p(df['interaction_cnt'].values))  # 防止误差
+#     mae = mean_absolute_error(true_vals, stacking_preds)
+#     print(f"📊 测试集 MAE: {mae:.4f}")
+# else:
+#     print("⚠️ 测试集中无 interaction_cnt 列，跳过 MAE 计算。")

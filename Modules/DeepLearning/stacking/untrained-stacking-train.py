@@ -11,11 +11,12 @@ from model import XTransformer
 from dataProcess import data_process
 
 # ===== 路径配置 =====
-data_path = '../../../Dataset/A/train_data.txt'
+data_path = '../../../Dataset/A/train.txt'
 catboost_model_path = '../models/stacking-catboost_model.cbm'
-transformer_model_path = '../models/tf-model7.pth'
+transformer_model_path = '../models/tf-model-all_data.pth'
 
-scaler_path = '../models/tf-scaler7.pkl'
+scaler_path = '../models/tf-scaler-all_data.pkl'
+
 stacking_model_path = '../models/stacking_meta_lgb.pkl'
 
 # ===== 数值特征（共17个）=====
